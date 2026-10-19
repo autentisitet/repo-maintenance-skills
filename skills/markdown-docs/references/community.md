@@ -2,7 +2,7 @@
 
 ## `.github/ISSUE_TEMPLATE/*.md`
 
-`bug_report.md`、`feature_request.md` 开头加一句，降低用户对格式的焦虑：
+模板较长或容易让贡献者误以为所有字段必填时，可在开头说明它只是辅助结构：
 
 > This is a suggested template, not a mandatory reporting format. Use the
 > sections that help communicate the problem; a clear free-form request is welcome.
@@ -12,22 +12,13 @@
 ## `.github/CONTRIBUTING.md`
 
 - 语气平等、欢迎，假设读者是第一次贡献，但不需要手把手教 git。
-- 二级标题顺序：
-
-1. Environment Setup
-2. Coding Standards
-3. Development Workflow
-4. Dependencies
-5. Security and CI
-6. Reporting Issues
-7. Contribution Checklist
-
-- 每一步给出可直接执行的命令。"安装依赖"这类没有命令的步骤等于没写。
+- 根据项目实际工作流组织环境、开发、检查、提交和问题报告，不固定标题或顺序。
+- 可执行步骤给出仓库中真实存在的命令；不要写无法落地的“安装依赖”“运行检查”。
 - 说明提交前要跑哪些检查，以及失败了怎么定位。
 
 ## `SECURITY.md`
 
-至少包含：
+说明受支持版本，例如：
 
 ```text
 Security fixes are targeted at the latest version on the default branch. Older
@@ -38,12 +29,13 @@ releases may not receive fixes.
 
 ## `DISCLAIMER.md`
 
-- 只写英文，不维护中文版本——免责声明出现两个版本时，歧义会成为问题。
-- 用词精确、书面化，避免含糊的日常表达；能选更准确的词时优先选它。
+- 免责声明涉及法律效果时优先让有资质的人审核。维护多语言版本时明确哪一版为准并保持同步。
+- 默认使用清楚、现代的书面英语。正式法律语域中，可以使用约定俗成且含义更精确的拉丁词源术语；不要仅因词源而用生僻长词替换更清楚的盎格鲁-撒克逊词源词汇。
+- 判断标准是法律含义、适用范围和读者能否准确理解，而不是词源本身。无法用普通词完整表达的术语，在首次出现时解释。
 - 明确适用范围（软件、数据、模型输出）和责任边界，不要写成长篇法律文本。
 
 ## `LICENSE`
 
 - 修改或分发他人代码时遵守上游许可证，并在 README 注明来源与改动范围。
 - 仓库同时分发第三方资产（字体、图标、模型权重、数据集）时，逐个核对许可证，不要只看代码的。
-- 更换许可证需要所有贡献者同意；历史贡献没有明确授权时不要擅自改。
+- 更换许可证前核对现有许可证、贡献协议和各贡献者授权；无法确认再许可权利时不要擅自改。

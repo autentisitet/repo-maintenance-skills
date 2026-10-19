@@ -1,4 +1,4 @@
 interface:
   display_name: "GitHub Actions 加固"
-  short_description: "workflow、依赖扫描与 CI 日志的加固规范"
+  short_description: "审查 workflow 权限、依赖安全、密钥使用和 CI 日志输出"
   default_prompt: "Use $github-actions-hardening to review and harden this repository's GitHub Actions setup."

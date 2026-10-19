@@ -11,8 +11,8 @@ metadata:
 
 - 压缩后的 CSS 是合法代码，但不能作为唯一源码。至少保留一份可编辑的源文件，产物另存并能在构建时重新生成。
 - 圆角、间距、字号、阴影、颜色收敛成一组 CSS 变量。新增取值前先确认现有 token 不够用。
-- 用 [scripts/audit-css-values.sh](scripts/audit-css-values.sh) 统计现有取值分布，把只出现一两次的合并掉。
-- 不要用 `!important` 修优先级；用更具体的选择器或调整层次。
+- 用 [scripts/audit-css-values.sh](scripts/audit-css-values.sh) 统计现有取值分布，把低频值作为人工审查线索；有明确语义或组件约束的值可以保留。
+- 新增 `!important` 前先排查层叠顺序、作用域和第三方样式边界。覆盖不可控的内联样式或外部组件时，`!important` 可能是合理的局部选择。
 
 ## 渲染验证
 
@@ -24,7 +24,7 @@ python3 -m http.server 8000 --directory ./dist &
 "<skill-dir>/scripts/screenshot.sh" http://localhost:8000 390x844 out/mobile.png
 ```
 
-- 至少看一档宽屏（1440）和一档窄屏（390）。
+- 根据目标设备至少检查一个代表性宽屏和窄屏尺寸；存在明确断点时覆盖断点两侧。
 - 截图后实际打开图片检查：溢出、遮挡、文字被截断、字号过小、对比度不足。
 - 静态截图覆盖不到 hover、focus、disabled 等状态，需要单独检查对应 CSS 规则。
 - 暗色模式单独截一轮，不要假设反色即可用。

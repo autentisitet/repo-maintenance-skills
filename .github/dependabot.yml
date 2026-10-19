@@ -8,3 +8,4 @@ updates:
     groups:
       actions:
         patterns: ["*"]
+    open-pull-requests-limit: 5

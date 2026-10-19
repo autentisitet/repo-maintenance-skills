@@ -29,7 +29,7 @@ echo
 
 for prop in border-radius gap padding font-size box-shadow; do
   echo "== $prop =="
-  grep -ohE "\\b${prop}\\s*:[^;{}]+" "${files[@]}" 2>/dev/null \
+  { grep -ohE "\\b${prop}\\s*:[^;{}]+" "${files[@]}" 2>/dev/null || true; } \
     | sed -E 's/^[^:]+:[[:space:]]*//' \
     | tr -d ' ' \
     | sort | uniq -c | sort -rn | head -15

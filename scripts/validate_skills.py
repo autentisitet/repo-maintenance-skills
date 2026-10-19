@@ -5,8 +5,9 @@
   - SKILL.md 存在，且以 YAML frontmatter 开头
   - name 与目录名一致，符合小写 kebab-case
   - description 非空、不超长、不是占位符
-  - Markdown 中引用的相对路径文件存在
+  - skill 与仓库根目录 Markdown 中引用的相对路径文件存在
   - agents/openai.yaml（若存在）中的 default_prompt 提到 $<name>
+  - agents/openai.yaml 的 short_description 长度符合 UI 约束
 
 退出码 0 表示全部通过。
 """
@@ -27,6 +28,8 @@ CODE_SPAN_RE = re.compile(r"`[^`\n]*`")
 PLACEHOLDERS = ("todo", "tbd", "fixme", "xxx", "<description>")
 MAX_NAME = 64
 MAX_DESC = 1024
+MIN_UI_DESC = 25
+MAX_UI_DESC = 64
 
 
 def parse_frontmatter(text: str) -> dict[str, str] | None:
@@ -85,6 +88,19 @@ def check_openai_yaml(skill_dir: Path, name: str, errors: list[str]) -> None:
     if prompt and f"${name}" not in prompt.group(1):
         rel = cfg.relative_to(ROOT)
         errors.append(f"{rel}: default_prompt 应显式提到 ${name}")
+
+    short = re.search(r'^\s*short_description:\s*["\']?(.+?)["\']?\s*$', text, re.MULTILINE)
+    if short:
+        value = short.group(1).strip().strip('"\'')
+        if not MIN_UI_DESC <= len(value) <= MAX_UI_DESC:
+            rel = cfg.relative_to(ROOT)
+            errors.append(
+                f"{rel}: short_description 应为 {MIN_UI_DESC}-{MAX_UI_DESC} 字符"
+                f"（当前 {len(value)}）"
+            )
+    else:
+        rel = cfg.relative_to(ROOT)
+        errors.append(f"{rel}: 缺少 interface.short_description")
 
 
 def check_skill(skill_dir: Path) -> list[str]:
@@ -145,6 +161,9 @@ def main() -> int:
         status = "FAIL" if errors else "ok  "
         print(f"[{status}] {skill_dir.name}")
         all_errors.extend(errors)
+
+    for markdown in sorted(ROOT.glob("*.md")):
+        check_links(markdown, all_errors)
 
     if all_errors:
         print()

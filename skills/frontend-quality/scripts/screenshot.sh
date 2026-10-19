@@ -55,12 +55,20 @@ fi
 mkdir -p "$(dirname "$out")"
 
 err_log="$(mktemp)"
+profile_dir="$(mktemp -d)"
+cleanup() {
+  rm -rf -- "$profile_dir"
+  rm -f -- "$err_log"
+}
+trap cleanup EXIT
+
 if ! "$chrome" \
   --headless=new \
   --disable-gpu \
   --hide-scrollbars \
   --no-first-run \
   --no-default-browser-check \
+  --user-data-dir="$profile_dir" \
   --virtual-time-budget=3000 \
   --window-size="$box" \
   --screenshot="$out" \

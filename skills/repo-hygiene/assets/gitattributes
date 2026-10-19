@@ -1,4 +1,4 @@
-# 换行归一：仓库内一律 LF，检出不依赖平台
+# 默认把文本规范化为 LF；按项目需要覆盖特殊文件
 * text=auto eol=lf
 
 # 明确二进制，避免被当成文本做 diff
@@ -24,7 +24,6 @@ docs/** linguist-documentation
 uv.lock linguist-generated
 requirements.txt linguist-generated
 
-# Windows 脚本保持 CRLF
+# cmd.exe 脚本使用 CRLF
 *.bat text eol=crlf
 *.cmd text eol=crlf
-*.ps1 text eol=crlf

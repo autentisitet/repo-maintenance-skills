@@ -13,16 +13,16 @@ metadata:
 | dependabot、CodeQL | [ci.md](references/ci.md#依赖与安全扫描) |
 | 日志脱敏、压缩、高亮、分组 | [log-hygiene.md](references/log-hygiene.md) |
 
-## 每个 workflow 都要有
+## 默认检查项
 
 - `permissions:` 显式声明。顶层给最小集合（通常 `contents: read`），需要写权限的 job 单独提升。
-- `concurrency:` + `cancel-in-progress: true`。同一个分支连续推送时，旧任务应该被取消而不是排队。
-- 第三方 Action 固定到 commit SHA。浮动 tag 由作者控制，可以被重新指向别的提交。
-- `defaults.run.shell: bash`。Windows runner 默认是 pwsh，同一份脚本会在那里失败。
+- 对可被新提交取代的验证任务，配置 `concurrency:` + `cancel-in-progress: true`。发布、迁移和其他必须完整执行的任务不要照搬。
+- 按风险选择 Action 引用：只读校验流程中的 GitHub 官方 Action 可以使用 major tag；第三方 Action，或接触 secrets、写权限、OIDC、发布与部署的流程，优先固定完整 commit SHA。
+- 跨平台 job 若共享 Bash 脚本，显式设置 `shell: bash`；依赖 PowerShell 或平台原生 shell 的任务保留对应 shell。
 - `timeout-minutes:`。默认 6 小时，卡死时浪费额度。
 
 ## 写之前先确认
 
-- 这个 job 是否需要 `pull_request` 之外的触发器？`pull_request_target` 会带着目标分支的权限运行并暴露 secrets。
+- 这个 job 是否需要 `pull_request` 之外的触发器？`pull_request_target` 在目标分支上下文运行，权限和 secrets 风险需要单独审查，不能直接执行不受信任的 PR 代码。
 - 有没有把 CI 需要的文件写进了 `.gitignore` 或 `paths-ignore`？这类错误会让测试静默不跑。
 - 工作流名与 badge、README 链接里引用的文件名一致吗？

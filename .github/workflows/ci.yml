@@ -31,8 +31,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      # TODO(pin): 依赖稳定后换成 commit SHA
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v7
       - name: Validate skills
         run: python3 scripts/validate_skills.py
       - name: Check shell scripts parse
@@ -42,3 +42,50 @@ jobs:
           for f in "${files[@]}"; do
             bash -n "$f" && echo "ok  $f"
           done
+      - name: Smoke-test CSS audit
+        run: |
+          test_dir="$(mktemp -d)"
+          printf '.a { padding: 8px; }\n.b { padding: 8px; gap: 12px; }\n' > "$test_dir/sample.css"
+          skills/frontend-quality/scripts/audit-css-values.sh "$test_dir" > "$test_dir/audit.log"
+          grep -Eq '[[:space:]]2 8px$' "$test_dir/audit.log"
+      - name: Smoke-test installer
+        run: |
+          test_home="$(mktemp -d)"
+          CODEX_HOME="$test_home/link" ./scripts/install.sh
+          test -L "$test_home/link/skills/markdown-docs"
+
+          CODEX_HOME="$test_home/copy" ./scripts/install.sh --copy
+          test -f "$test_home/copy/skills/markdown-docs/SKILL.md"
+
+          CODEX_HOME="$test_home/copy" ./scripts/install.sh --copy --force
+          test -f "$test_home/copy/skills/markdown-docs/SKILL.md"
+
+
+  windows-installer:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Smoke-test PowerShell installer
+        run: |
+          $env:CODEX_HOME = Join-Path $env:RUNNER_TEMP "codex-junction"
+          .\scripts\install.ps1
+          $link = Get-Item "$env:CODEX_HOME\skills\markdown-docs"
+          if ($link.LinkType -ne "Junction") {
+            throw "junction install failed"
+          }
+
+          $env:CODEX_HOME = Join-Path $env:RUNNER_TEMP "codex-copy"
+          .\scripts\install.ps1 -Copy
+          if (-not (Test-Path "$env:CODEX_HOME\skills\markdown-docs\SKILL.md")) {
+            throw "initial copy install failed"
+          }
+
+          .\scripts\install.ps1 -Copy -Force
+          if (-not (Test-Path "$env:CODEX_HOME\skills\markdown-docs\SKILL.md")) {
+            throw "forced copy install failed"
+          }

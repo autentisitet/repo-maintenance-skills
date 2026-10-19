@@ -1,4 +1,4 @@
 interface:
   display_name: "仓库卫生"
-  short_description: "仓库配置、忽略规则与依赖同步"
+  short_description: "审查仓库配置、忽略规则、换行策略与 Python 依赖同步"
   default_prompt: "Use $repo-hygiene to set up or audit this repository's config files."

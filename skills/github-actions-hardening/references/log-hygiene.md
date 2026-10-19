@@ -2,18 +2,18 @@
 
 ## 脱敏
 
-`${{ secrets.X }}` 由 Actions 在输出时按值匹配并打码。一旦值被拼接、编码或赋给中间变量，模式就对不上了：
+GitHub Actions 会尝试在日志中遮蔽已登记 secret 的原值。把原值赋给 shell 变量不会仅凭这一步绕过遮蔽；风险来自编码、截断、拼接或其他变换，因为派生值可能不再与已登记值匹配。
 
 ```bash
-# 泄漏：派生值不会被自动脱敏
+# 原值通常仍会被遮蔽，但没有必要输出它
 token="${{ secrets.TOKEN }}"
 echo "token is $token"
 
-# 正确：在使用处直接展开
+# 更安全：只在消费位置传入，不主动写日志
 curl -H "Authorization: Bearer ${{ secrets.TOKEN }}" https://example.com
 ```
 
-确实要处理派生值时，先手动打码：
+确实要输出或传递派生值时，在它第一次可能进入日志之前手动打码：
 
 ```bash
 derived="$(printf '%s' "${{ secrets.TOKEN }}" | base64)"

@@ -17,9 +17,9 @@ metadata:
 
 ## 共用约束
 
-1. 目标渲染环境是 GitHub，同时要与 VS Code 预览一致。改完必须实际看一眼渲染结果：两者在 HTML 白名单、mermaid 版本、锚点生成上都有差异，凭记忆判断会出错。
-2. 遵守 markdownlint。仓库没有配置时，复制 [assets/markdownlint.json](assets/markdownlint.json)，不要逐条背规则。
-3. 规则确实妨碍表达时，在 `.markdownlint.json` 里显式关闭那一条并写明原因；不要用加空行、拆句子之类的方式绕过。
+1. 先确认目标渲染环境。GitHub 与编辑器预览在 HTML 白名单、mermaid 版本、锚点生成上可能不同；涉及这些特性时查看实际渲染结果。
+2. 仓库已有 markdownlint 配置或 CI 检查时遵守它。用户决定新引入 markdownlint 时，可从 [assets/markdownlint.json](assets/markdownlint.json) 开始调整。
+3. 规则确实妨碍表达时，在配置中显式调整并说明原因，不要靠无意义的空行或拆句规避检查。
 4. 重命名或新增文档后，同步检查 README 的目录和相对链接。
 
 ## 语言

@@ -26,9 +26,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@<commit-sha>  # 不要用浮动 tag
+      - uses: actions/checkout@v7
       - run: ./scripts/build.sh
 ```
+
+## Action 引用策略
+
+不要把 SHA pinning 当成所有 workflow 的固定格式。先看 Action 来源、job 权限和被篡改后的后果：
+
+| 场景 | 建议引用方式 |
+| --- | --- |
+| GitHub 官方 Action；只读权限；不接触 secrets；只跑测试或静态检查 | major tag，例如 `actions/checkout@v7` |
+| 第三方 Action，但 job 无 secrets 和写权限，输出也不作为可信发布物 | major tag 或完整 SHA，按仓库维护成本选择 |
+| Action 接触 secrets、`contents: write`、`id-token: write`、发布、签名或部署 | 优先使用完整 commit SHA，并在旁边注明对应版本；若保留官方 Action 的 major tag，明确这是对发布方的信任选择 |
+
+major tag 可能被维护者更新指向，完整 SHA 则牺牲更新便利换取不可变引用。选择应与实际权限和供应链风险匹配，不要让低风险校验仓库承担无收益的维护成本。
 
 ## paths-ignore
 
@@ -53,7 +65,7 @@ on:
 
 ## 密钥
 
-详见 [log-hygiene.md](log-hygiene.md)。核心一条：`${{ secrets.X }}` 在使用处直接展开，先赋给中间变量会让脱敏失效。
+详见 [log-hygiene.md](log-hygiene.md)。避免输出 secret；原值通常能被日志遮蔽，但编码、截断、拼接等派生值需要在输出前用 `::add-mask::` 单独登记。
 
 ## 矩阵
 
@@ -63,8 +75,8 @@ on:
 
 ## 缓存
 
-- key 必须包含依赖文件的哈希：`${{ hashFiles('**/uv.lock') }}`。否则锁文件更新后仍然命中旧缓存，问题会以"本地能跑"的形式出现。
-- 缓存的是下载产物，不要缓存构建结果——构建结果的失效条件很难写对。
+- 依赖缓存的 key 通常应包含锁文件哈希，例如 `${{ hashFiles('**/uv.lock') }}`，并包含影响缓存兼容性的运行时和平台信息。
+- 构建结果只有在输入和工具链都能可靠纳入 key 时才适合缓存；无法定义失效条件时优先缓存下载产物。
 
 ## 依赖与安全扫描
 
@@ -82,14 +94,14 @@ updates:
         patterns: ["*"]
 ```
 
-- 至少配置 `github-actions` 生态；有 Python 依赖时加 `pip` 或 `uv`。
+- 为仓库实际使用、且希望自动更新的生态配置 dependabot；本 skill 涉及的仓库通常应包含 `github-actions`。
 - 用 `groups` 合并 patch 更新，否则每个小版本都会单独开 PR。
-- 与 SHA pinning 冲突：启用 pinning 后仍需人工确认 SHA 变更来自可信提交。
+- 使用 major tag 时让 Dependabot 提醒跨 major 升级；使用完整 SHA 时，审查更新是否对应可信 release，不要只看自动生成的版本注释。
 
 ### CodeQL
 
 - public repo 优先用 Settings → Code security 里的 default setup，不要手写 workflow。
-- private repo 若未启用 GitHub Advanced Security，才需要自行编写 workflow，并确认 `language` 矩阵覆盖实际使用的语言。
+- private repo 是否能使用 CodeQL 取决于当前 GitHub 方案和安全功能配置；先检查仓库设置，再决定使用 default setup 或 workflow。
 - 手写时 `permissions` 至少需要 `security-events: write`。
 
 ## 常见失败

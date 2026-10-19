@@ -3,18 +3,26 @@
 #
 # 用法:
 #   ./scripts/install.sh            # 软链（推荐，改完直接生效）
-#   ./scripts/install.sh --copy     # 复制（Windows 无符号链接权限时）
+#   ./scripts/install.sh --copy         # 复制而不是软链接
+#   ./scripts/install.sh --copy --force # 替换已有副本
 set -euo pipefail
 
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 dest="${CODEX_HOME:-$HOME/.codex}/skills"
-mode="${1:-}"
+mode="link"
+force=false
 
-if [[ -n "$mode" && "$mode" != "--copy" ]]; then
-  echo "未知参数: $mode" >&2
-  echo "用法: $0 [--copy]" >&2
-  exit 2
-fi
+for arg in "$@"; do
+  case "$arg" in
+    --copy) mode="copy" ;;
+    --force) force=true ;;
+    *)
+      echo "未知参数: $arg" >&2
+      echo "用法: $0 [--copy] [--force]" >&2
+      exit 2
+      ;;
+  esac
+done
 
 mkdir -p "$dest"
 echo "安装目标: $dest"
@@ -23,12 +31,14 @@ for dir in "$repo"/skills/*/; do
   name="$(basename "$dir")"
   target="$dest/$name"
 
-  if [[ -e "$target" || -L "$target" ]]; then
+  if [[ ( -e "$target" || -L "$target" ) && "$force" == true ]]; then
+    rm -rf -- "$target"
+  elif [[ -e "$target" || -L "$target" ]]; then
     echo "skip  $name（已存在：$target）"
     continue
   fi
 
-  if [[ "$mode" == "--copy" ]]; then
+  if [[ "$mode" == "copy" ]]; then
     cp -R "${dir%/}" "$target"
     echo "copy  $name"
   else
