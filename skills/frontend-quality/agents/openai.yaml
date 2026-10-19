@@ -1,0 +1,4 @@
+interface:
+  display_name: "前端界面质量"
+  short_description: "界面取值收敛、渲染验证与可访问性"
+  default_prompt: "Use $frontend-quality to review this HTML/CSS work and verify the real rendering."

@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    # 本仓库的校验对象是 Markdown 结构与链接，因此不能忽略 *.md；
+    # 只忽略不参与校验的文件。
+    paths-ignore:
+      - "LICENSE"
+      - "**/*.png"
+      - "**/*.jpg"
+  pull_request:
+    paths-ignore:
+      - "LICENSE"
+      - "**/*.png"
+      - "**/*.jpg"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # TODO(pin): 依赖稳定后换成 commit SHA
+      - uses: actions/checkout@v4
+      - name: Validate skills
+        run: python3 scripts/validate_skills.py
+      - name: Check shell scripts parse
+        run: |
+          shopt -s nullglob
+          files=(scripts/*.sh skills/*/scripts/*.sh)
+          for f in "${files[@]}"; do
+            bash -n "$f" && echo "ok  $f"
+          done

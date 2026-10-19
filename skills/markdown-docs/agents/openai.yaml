@@ -1,0 +1,4 @@
+interface:
+  display_name: "Markdown 文档"
+  short_description: "仓库 Markdown 文档的规范与模板"
+  default_prompt: "Use $markdown-docs to write or revise this repository's Markdown documentation."

@@ -1,0 +1,10 @@
+version: 2
+updates:
+  # 本仓库没有 Python 依赖，只跟踪 Actions 本身。
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions:
+        patterns: ["*"]

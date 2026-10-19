@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json",
+  "default": true,
+  "MD013": false,
+  "MD024": {
+    "siblings_only": true
+  },
+  "MD033": {
+    "allowed_elements": [
+      "a",
+      "br",
+      "details",
+      "div",
+      "img",
+      "kbd",
+      "p",
+      "picture",
+      "source",
+      "span",
+      "sub",
+      "summary",
+      "sup"
+    ]
+  },
+  "MD041": false
+}

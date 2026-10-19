@@ -1,0 +1,30 @@
+# 换行归一：仓库内一律 LF，检出不依赖平台
+* text=auto eol=lf
+
+# 明确二进制，避免被当成文本做 diff
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.onnx binary
+*.pt binary
+*.safetensors binary
+
+# 不要在语言统计里刷屏
+docs/** linguist-documentation
+uv.lock linguist-generated
+requirements.txt linguist-generated
+
+# Windows 脚本保持 CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
