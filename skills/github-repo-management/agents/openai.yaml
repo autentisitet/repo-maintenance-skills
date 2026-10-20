@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub 仓库管理"
+  short_description: "规划分支、提交与测试，并管理 GitHub 仓库设置和展示元数据"
+  default_prompt: "Use $github-repo-management to plan a branch, commits, tests, or a GitHub repository operation."
