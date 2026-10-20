@@ -33,8 +33,15 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+      - name: Install validator dependencies
+        run: python3 -m pip install -r requirements.txt
       - name: Validate skills
-        run: python3 scripts/validate_skills.py
+        run: |
+          python3 scripts/validate_skills.py
+          python3 scripts/test_validate_skills.py
+          python3 scripts/test_skill_examples.py
+          python3 scripts/validate_skill_evals.py
+          python3 skills/markdown-docs/scripts/section-dividers.py --check .
       - name: Check shell scripts parse
         run: |
           shopt -s nullglob
@@ -59,6 +66,16 @@ jobs:
 
           CODEX_HOME="$test_home/copy" ./scripts/install.sh --copy --force
           test -f "$test_home/copy/skills/markdown-docs/SKILL.md"
+
+          mkdir -p "$test_home/unmanaged/skills/markdown-docs"
+          touch "$test_home/unmanaged/skills/markdown-docs/keep-me"
+          if CODEX_HOME="$test_home/unmanaged" ./scripts/install.sh --force \
+            >"$test_home/unmanaged.log" 2>&1; then
+            echo "installer replaced an unmanaged skill" >&2
+            exit 1
+          fi
+          grep -F "拒绝替换非本项目管理的 skill" "$test_home/unmanaged.log"
+          test -f "$test_home/unmanaged/skills/markdown-docs/keep-me"
 
 
   windows-installer:
@@ -88,4 +105,27 @@ jobs:
           .\scripts\install.ps1 -Copy -Force
           if (-not (Test-Path "$env:CODEX_HOME\skills\markdown-docs\SKILL.md")) {
             throw "forced copy install failed"
+          }
+
+          $env:CODEX_HOME = Join-Path $env:RUNNER_TEMP "codex-unmanaged"
+          $unmanaged = Join-Path $env:CODEX_HOME "skills\markdown-docs"
+          New-Item -ItemType Directory -Path $unmanaged -Force | Out-Null
+          New-Item -ItemType File -Path (Join-Path $unmanaged "keep-me") | Out-Null
+          $refused = $false
+          try {
+            .\scripts\install.ps1 -Force
+          }
+          catch {
+            if ($_.Exception.Message -match "拒绝替换非本项目管理的 skill") {
+              $refused = $true
+            }
+            else {
+              throw
+            }
+          }
+          if (-not $refused) {
+            throw "installer replaced an unmanaged skill"
+          }
+          if (-not (Test-Path (Join-Path $unmanaged "keep-me"))) {
+            throw "unmanaged skill was removed"
           }
