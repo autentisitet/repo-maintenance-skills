@@ -1,0 +1,280 @@
+version: 1
+cases:
+  - id: backend-direct
+    skill: backend-quality
+    category: direct
+    prompt: 使用本仓库的 Nginx 和 Docker 约定实现一个 FastAPI 文件上传接口。
+    should_trigger: true
+    expected: 检查 OpenAPI、上传安全、Nginx 边界和数据服务网络。
+  - id: backend-indirect
+    skill: backend-quality
+    category: indirect
+    prompt: 新增头像上传后同步生成 API 契约，并确认公网不能直连应用端口。
+    should_trigger: true
+    expected: 识别为采用本仓库部署约定的后端变更。
+  - id: backend-incomplete
+    skill: backend-quality
+    category: incomplete
+    prompt: 帮我改一下 FastAPI 上传接口。
+    should_trigger: true
+    expected: 先检查项目是否采用本仓库的 Nginx、容器和文档路径约定。
+  - id: backend-negative
+    skill: backend-quality
+    category: negative
+    prompt: 为 AWS Lambda 编写一个无容器的 Python 函数。
+    should_trigger: false
+    expected: 不强制套用 Nginx 和 Docker/Podman 规则。
+  - id: backend-edge
+    skill: backend-quality
+    category: edge
+    prompt: 审查一个只在内网运行、没有公网入口的 FastAPI 管理服务。
+    should_trigger: true
+    expected: 应用接口和上传规则，但不虚构公网 Nginx 工作。
+
+  - id: authoring-direct
+    skill: codex-skill-authoring
+    category: direct
+    prompt: 为这个仓库新增一个 Codex skill，并验证 frontmatter 和 UI 元数据。
+    should_trigger: true
+    expected: 使用本仓库的 skill 结构和验证流程。
+  - id: authoring-indirect
+    skill: codex-skill-authoring
+    category: indirect
+    prompt: 这份 SKILL.md 太长，帮我拆 references 并降低上下文成本。
+    should_trigger: true
+    expected: 审查渐进披露和触发描述。
+  - id: authoring-incomplete
+    skill: codex-skill-authoring
+    category: incomplete
+    prompt: 想加一个处理发布流程的 skill。
+    should_trigger: true
+    expected: 先检查现有能力是否重叠，再决定结构。
+  - id: authoring-negative
+    skill: codex-skill-authoring
+    category: negative
+    prompt: 帮我写普通项目 README。
+    should_trigger: false
+    expected: 应使用 Markdown 文档能力而不是 skill 编写能力。
+  - id: authoring-edge
+    skill: codex-skill-authoring
+    category: edge
+    prompt: 只修改现有 skill 的一句 description，不改其他文件。
+    should_trigger: true
+    expected: 保持窄范围修改并重新验证该 skill。
+
+  - id: container-direct
+    skill: container-quality
+    category: direct
+    prompt: 按本仓库约定创建 Docker 和 Podman 共用的 CPU/GPU Compose 配置。
+    should_trigger: true
+    expected: 使用基础拓扑和四个覆盖文件。
+  - id: container-indirect
+    skill: container-quality
+    category: indirect
+    prompt: Fedora Enforcing 下 bind mount 无法写入，同时日志占满磁盘。
+    should_trigger: true
+    expected: 检查 SELinux 标签、rootless 权限和日志轮转。
+  - id: container-incomplete
+    skill: container-quality
+    category: incomplete
+    prompt: 把服务容器化并兼容 GPU。
+    should_trigger: true
+    expected: 确认 Docker/Podman、CPU/GPU 和目标发行版后再实现。
+  - id: container-negative
+    skill: container-quality
+    category: negative
+    prompt: 为现有 Kubernetes 集群编写 Helm chart。
+    should_trigger: false
+    expected: 不套用 Compose 文件布局。
+  - id: container-edge
+    skill: container-quality
+    category: edge
+    prompt: 主机同时安装 Docker 和 Podman，Makefile 必须显式选择 Docker CPU。
+    should_trigger: true
+    expected: 保持 Compose 与 runtime 一致并选择 Docker CPU 覆盖。
+
+  - id: frontend-direct
+    skill: frontend-quality
+    category: direct
+    prompt: 审查这个静态页面的 CSS、移动端截图和无障碍问题。
+    should_trigger: true
+    expected: 检查设计取值、真实渲染和可访问性。
+  - id: frontend-indirect
+    skill: frontend-quality
+    category: indirect
+    prompt: 页面在 390px 宽度文字被截断，暗色模式也看不清。
+    should_trigger: true
+    expected: 截图检查窄屏、暗色模式和对比度。
+  - id: frontend-incomplete
+    skill: frontend-quality
+    category: incomplete
+    prompt: 这个 HTML 看起来不太对，帮我检查。
+    should_trigger: true
+    expected: 先启动可用页面并检查代表性视口。
+  - id: frontend-negative
+    skill: frontend-quality
+    category: negative
+    prompt: 帮我选择 React 状态管理框架。
+    should_trigger: false
+    expected: 不把界面质量 skill 用于框架选型。
+  - id: frontend-edge
+    skill: frontend-quality
+    category: edge
+    prompt: 第三方组件只能通过局部 important 覆盖内联样式。
+    should_trigger: true
+    expected: 允许有明确边界的局部 important。
+
+  - id: actions-direct
+    skill: github-actions-hardening
+    category: direct
+    prompt: 加固这个 GitHub Actions 发布 workflow 的权限和 Action 引用。
+    should_trigger: true
+    expected: 检查权限、secrets、OIDC、SHA 和日志。
+  - id: actions-indirect
+    skill: github-actions-hardening
+    category: indirect
+    prompt: fork PR 在 pull_request_target 中执行脚本并读取 secret。
+    should_trigger: true
+    expected: 识别高风险触发器和不受信任代码执行。
+  - id: actions-incomplete
+    skill: github-actions-hardening
+    category: incomplete
+    prompt: CI 经常挂住，日志也非常大。
+    should_trigger: true
+    expected: 检查 timeout、日志输出和任务取消策略。
+  - id: actions-negative
+    skill: github-actions-hardening
+    category: negative
+    prompt: 为 GitLab CI 编写 pipeline。
+    should_trigger: false
+    expected: 不套用 GitHub Actions 专属规则。
+  - id: actions-edge
+    skill: github-actions-hardening
+    category: edge
+    prompt: 只读测试 job 是否必须固定 GitHub 官方 Action 的完整 SHA？
+    should_trigger: true
+    expected: 根据权限和供应链风险判断，不绝对化。
+
+  - id: repo-direct
+    skill: github-repo-management
+    category: direct
+    prompt: 规划分支和分批提交，然后重命名 GitHub 仓库。
+    should_trigger: true
+    expected: 先只读确认，远程修改前说明命令和影响。
+  - id: repo-indirect
+    skill: github-repo-management
+    category: indirect
+    prompt: 把一个仓库完整镜像到新的 GitHub 私有仓库。
+    should_trigger: true
+    expected: 加载镜像迁移规则并检查许可证和非 Git 数据。
+  - id: repo-incomplete
+    skill: github-repo-management
+    category: incomplete
+    prompt: 帮我整理一下这次提交。
+    should_trigger: true
+    expected: 先读取 diff 和仓库约定，再规划 commit。
+  - id: repo-negative
+    skill: github-repo-management
+    category: negative
+    prompt: 审查这个 PR 中的业务逻辑错误。
+    should_trigger: false
+    expected: 不把仓库管理 skill 当作代码审查 skill。
+  - id: repo-edge
+    skill: github-repo-management
+    category: edge
+    prompt: gh 未登录，但用户要求立即创建远程仓库。
+    should_trigger: true
+    expected: 做只读 preflight，并在授权或认证不足时停止。
+
+  - id: docs-direct
+    skill: markdown-docs
+    category: direct
+    prompt: 重写 README，并确保二级标题之间有水平分割线。
+    should_trigger: true
+    expected: 遵守仓库 Markdown 格式和渲染约定。
+  - id: docs-indirect
+    skill: markdown-docs
+    category: indirect
+    prompt: CHANGELOG 的未发布改动被写进了历史版本。
+    should_trigger: true
+    expected: 加载 changelog reference 并修正归属。
+  - id: docs-incomplete
+    skill: markdown-docs
+    category: incomplete
+    prompt: 帮我整理这份仓库文档。
+    should_trigger: true
+    expected: 先确认文档类型和目标渲染环境。
+  - id: docs-negative
+    skill: markdown-docs
+    category: negative
+    prompt: 给 Python 函数增加行内代码注释。
+    should_trigger: false
+    expected: 不将仓库 Markdown 规则用于代码注释。
+  - id: docs-edge
+    skill: markdown-docs
+    category: edge
+    prompt: GitHub 与本地预览的 Mermaid 渲染结果不同。
+    should_trigger: true
+    expected: 以目标平台实际渲染为准。
+
+  - id: layout-direct
+    skill: project-layout
+    category: direct
+    prompt: 按本仓库固定目录约定整理前后端、训练和部署文件。
+    should_trigger: true
+    expected: 使用 frontend、deploy、deploy-config、src 等边界。
+  - id: layout-indirect
+    skill: project-layout
+    category: indirect
+    prompt: 这个采用本仓库约定的项目把 Nginx、Compose 和后端源码全放在根目录。
+    should_trigger: true
+    expected: 按固定布局迁移并更新引用。
+  - id: layout-incomplete
+    skill: project-layout
+    category: incomplete
+    prompt: 帮我整理项目目录。
+    should_trigger: true
+    expected: 先确认用户是否明确采用本仓库固定布局。
+  - id: layout-negative
+    skill: project-layout
+    category: negative
+    prompt: 保持 Django 社区标准目录，不采用额外的 deploy 目录。
+    should_trigger: false
+    expected: 尊重用户指定结构，不强制迁移。
+  - id: layout-edge
+    skill: project-layout
+    category: edge
+    prompt: 同一个项目既有 FastAPI 服务又有模型训练和推理核心。
+    should_trigger: true
+    expected: 服务入口放 deploy，模型核心放 src，避免复制实现。
+
+  - id: hygiene-direct
+    skill: repo-hygiene
+    category: direct
+    prompt: 配置 gitignore、editorconfig，并同步 uv 锁文件导出。
+    should_trigger: true
+    expected: 使用仓库配置和依赖同步规则。
+  - id: hygiene-indirect
+    skill: repo-hygiene
+    category: indirect
+    prompt: 需要保留空的运行目录，但不要使用 gitkeep。
+    should_trigger: true
+    expected: 使用目录内 gitignore 保留目录。
+  - id: hygiene-incomplete
+    skill: repo-hygiene
+    category: incomplete
+    prompt: 帮我整理仓库里的点文件。
+    should_trigger: true
+    expected: 先检查已有约定和团队共享配置。
+  - id: hygiene-negative
+    skill: repo-hygiene
+    category: negative
+    prompt: 实现新的支付业务接口。
+    should_trigger: false
+    expected: 不触发仓库配置 skill。
+  - id: hygiene-edge
+    skill: repo-hygiene
+    category: edge
+    prompt: 团队提交了部分 VS Code 配置，其他状态仍需忽略。
+    should_trigger: true
+    expected: 检查共享文件后编写精确规则，不整目录忽略。
