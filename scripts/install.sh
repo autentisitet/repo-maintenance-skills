@@ -11,6 +11,7 @@ repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 dest="${CODEX_HOME:-$HOME/.codex}/skills"
 mode="link"
 force=false
+marker_name=".repo-maintenance-skills-install"
 
 for arg in "$@"; do
   case "$arg" in
@@ -32,6 +33,18 @@ for dir in "$repo"/skills/*/; do
   target="$dest/$name"
 
   if [[ ( -e "$target" || -L "$target" ) && "$force" == true ]]; then
+    managed=false
+    if [[ -L "$target" && "$(readlink "$target")" == "${dir%/}" ]]; then
+      managed=true
+    elif [[ -f "$target/$marker_name" ]] \
+      && [[ "$(<"$target/$marker_name")" == "repo-maintenance-skills:$name" ]]; then
+      managed=true
+    fi
+    if [[ "$managed" != true ]]; then
+      echo "拒绝替换非本项目管理的 skill: $target" >&2
+      echo "请先手动备份或移走该目录。" >&2
+      exit 1
+    fi
     rm -rf -- "$target"
   elif [[ -e "$target" || -L "$target" ]]; then
     echo "skip  $name（已存在：$target）"
@@ -40,6 +53,7 @@ for dir in "$repo"/skills/*/; do
 
   if [[ "$mode" == "copy" ]]; then
     cp -R "${dir%/}" "$target"
+    printf 'repo-maintenance-skills:%s\n' "$name" > "$target/$marker_name"
     echo "copy  $name"
   else
     ln -s "${dir%/}" "$target"

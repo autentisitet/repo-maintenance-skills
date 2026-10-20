@@ -13,6 +13,7 @@ if ([System.Environment]::OSVersion.Platform -ne [System.PlatformID]::Win32NT) {
 $Repo = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $CodexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME ".codex" }
 $Dest = Join-Path $CodexHome "skills"
+$MarkerName = ".repo-maintenance-skills-install"
 
 New-Item -ItemType Directory -Path $Dest -Force | Out-Null
 Write-Host "安装目标: $Dest"
@@ -29,6 +30,20 @@ Get-ChildItem (Join-Path $Repo "skills") -Directory | ForEach-Object {
     else {
         if ($Existing) {
             $IsLink = ($Existing.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0
+            $IsManaged = $false
+            if ($IsLink -and $Existing.Target) {
+                $LinkTarget = [System.IO.Path]::GetFullPath([string]$Existing.Target)
+                $IsManaged = $LinkTarget -eq [System.IO.Path]::GetFullPath($Source)
+            }
+            else {
+                $Marker = Join-Path $Target $MarkerName
+                if (Test-Path -LiteralPath $Marker -PathType Leaf) {
+                    $IsManaged = (Get-Content -LiteralPath $Marker -Raw).Trim() -eq "repo-maintenance-skills:$Name"
+                }
+            }
+            if (-not $IsManaged) {
+                throw "拒绝替换非本项目管理的 skill: $Target。请先手动备份或移走该目录。"
+            }
             if ($IsLink) {
                 Remove-Item -LiteralPath $Target -Force
             }
@@ -39,6 +54,7 @@ Get-ChildItem (Join-Path $Repo "skills") -Directory | ForEach-Object {
 
         if ($Copy) {
             Copy-Item -LiteralPath $Source -Destination $Target -Recurse
+            Set-Content -LiteralPath (Join-Path $Target $MarkerName) -Value "repo-maintenance-skills:$Name"
             Write-Host "copy  $Name"
         }
         else {
