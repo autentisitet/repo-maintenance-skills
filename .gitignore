@@ -2,3 +2,5 @@
 Thumbs.db
 *.log
 out/
+__pycache__/
+*.py[cod]

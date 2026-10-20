@@ -18,10 +18,13 @@ import re
 import sys
 from pathlib import Path
 
+import yaml
+
 ROOT = Path(__file__).resolve().parent.parent
 SKILLS_DIR = ROOT / "skills"
 
 NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+FRONTMATTER_RE = re.compile(r"\A---\n(.*?)\n---[ \t]*(?:\n|\Z)", re.DOTALL)
 LINK_RE = re.compile(r"\]\(\s*([^)\s]+?)\s*\)")
 FENCE_RE = re.compile(r"^```.*?^```[ \t]*$", re.DOTALL | re.MULTILINE)
 CODE_SPAN_RE = re.compile(r"`[^`\n]*`")
@@ -30,31 +33,33 @@ MAX_NAME = 64
 MAX_DESC = 1024
 MIN_UI_DESC = 25
 MAX_UI_DESC = 64
+ALLOWED_FRONT_KEYS = {"name", "description", "license", "allowed-tools", "metadata"}
 
 
-def parse_frontmatter(text: str) -> dict[str, str] | None:
-    """解析顶层 `key: value` 形式的 frontmatter。"""
+def display_path(path: Path) -> Path:
+    """Use repository-relative paths when possible, absolute paths otherwise."""
+    try:
+        return path.relative_to(ROOT)
+    except ValueError:
+        return path
+
+
+def parse_frontmatter(text: str) -> dict[str, object] | None:
+    """解析 YAML frontmatter；格式错误时抛出 ValueError。"""
     normalized = text.replace("\r\n", "\n")
-    if not normalized.startswith("---\n"):
+    match = FRONTMATTER_RE.match(normalized)
+    if not match:
         return None
 
-    end = normalized.find("\n---\n", 4)
-    if end == -1:
-        end = normalized.find("\n---", 4)
-    if end == -1:
-        return None
-
-    data: dict[str, str] = {}
-    for line in normalized[4:end].splitlines():
-        if not line.strip() or line.lstrip().startswith("#"):
-            continue
-        if ":" not in line:
-            continue
-        key, value = line.split(":", 1)
-        value = value.strip()
-        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
-            value = value[1:-1]
-        data[key.strip()] = value
+    try:
+        data = yaml.safe_load(match.group(1))
+    except yaml.YAMLError as exc:
+        raise ValueError(f"YAML frontmatter 无效: {exc}") from exc
+    if not isinstance(data, dict):
+        raise ValueError("YAML frontmatter 必须是 mapping")
+    unexpected = set(data) - ALLOWED_FRONT_KEYS
+    if unexpected:
+        raise ValueError(f"YAML frontmatter 含不支持字段: {', '.join(sorted(unexpected))}")
     return data
 
 
@@ -75,7 +80,7 @@ def check_links(markdown: Path, errors: list[str]) -> None:
             continue
         resolved = (markdown.parent / target).resolve()
         if not resolved.exists():
-            rel = markdown.relative_to(ROOT)
+            rel = display_path(markdown)
             errors.append(f"{rel}: 链接目标不存在 -> {raw}")
 
 
@@ -83,23 +88,34 @@ def check_openai_yaml(skill_dir: Path, name: str, errors: list[str]) -> None:
     cfg = skill_dir / "agents" / "openai.yaml"
     if not cfg.exists():
         return
-    text = cfg.read_text(encoding="utf-8")
-    prompt = re.search(r"^\s*default_prompt:\s*(.+)$", text, re.MULTILINE)
-    if prompt and f"${name}" not in prompt.group(1):
-        rel = cfg.relative_to(ROOT)
+    try:
+        data = yaml.safe_load(cfg.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        rel = display_path(cfg)
+        errors.append(f"{rel}: YAML 无效 -> {exc}")
+        return
+    if not isinstance(data, dict) or not isinstance(data.get("interface"), dict):
+        rel = display_path(cfg)
+        errors.append(f"{rel}: 缺少 interface mapping")
+        return
+
+    interface = data["interface"]
+    prompt = interface.get("default_prompt")
+    if not isinstance(prompt, str) or f"${name}" not in prompt:
+        rel = display_path(cfg)
         errors.append(f"{rel}: default_prompt 应显式提到 ${name}")
 
-    short = re.search(r'^\s*short_description:\s*["\']?(.+?)["\']?\s*$', text, re.MULTILINE)
-    if short:
-        value = short.group(1).strip().strip('"\'')
+    short = interface.get("short_description")
+    if isinstance(short, str):
+        value = short.strip()
         if not MIN_UI_DESC <= len(value) <= MAX_UI_DESC:
-            rel = cfg.relative_to(ROOT)
+            rel = display_path(cfg)
             errors.append(
                 f"{rel}: short_description 应为 {MIN_UI_DESC}-{MAX_UI_DESC} 字符"
                 f"（当前 {len(value)}）"
             )
     else:
-        rel = cfg.relative_to(ROOT)
+        rel = display_path(cfg)
         errors.append(f"{rel}: 缺少 interface.short_description")
 
 
@@ -113,12 +129,15 @@ def check_skill(skill_dir: Path) -> list[str]:
         return [f"{skill_dir.relative_to(ROOT)}: 缺少 SKILL.md"]
 
     text = entry.read_text(encoding="utf-8")
-    front = parse_frontmatter(text)
+    try:
+        front = parse_frontmatter(text)
+    except ValueError as exc:
+        return [f"{rel}: {exc}"]
     if front is None:
         return [f"{rel}: 缺少以 --- 包裹的 YAML frontmatter"]
 
     declared = front.get("name", "")
-    if not declared:
+    if not isinstance(declared, str) or not declared:
         errors.append(f"{rel}: frontmatter 缺少 name")
     elif declared != name:
         errors.append(f"{rel}: name 为 {declared!r}，与目录名 {name!r} 不一致")
@@ -128,7 +147,7 @@ def check_skill(skill_dir: Path) -> list[str]:
         errors.append(f"{rel}: name 超过 {MAX_NAME} 字符")
 
     desc = front.get("description", "")
-    if not desc:
+    if not isinstance(desc, str) or not desc:
         errors.append(f"{rel}: frontmatter 缺少 description")
     elif len(desc) > MAX_DESC:
         errors.append(f"{rel}: description 超过 {MAX_DESC} 字符（当前 {len(desc)}）")
