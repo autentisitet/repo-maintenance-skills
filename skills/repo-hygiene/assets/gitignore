@@ -3,17 +3,13 @@
 Thumbs.db
 desktop.ini
 
-# IDE
-.idea/
-*.code-workspace
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-
-# agent 本地状态
-.claude/
-.codex/
-.agents/
+# IDE 与 agent 目录可能包含团队配置。确认只保存本地状态后，再按需取消注释。
+# .idea/
+# *.code-workspace
+# .vscode/
+# .claude/
+# .codex/
+# .agents/
 
 # 环境变量
 .env
