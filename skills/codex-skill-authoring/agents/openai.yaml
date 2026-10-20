@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Skill 编写"
+  short_description: "创建、审查和精简 Codex skill，并验证结构、路由与上下文成本"
+  default_prompt: "Use $codex-skill-authoring to create, review, or simplify this Codex skill."
