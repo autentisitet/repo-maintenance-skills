@@ -30,6 +30,8 @@ jobs:
       - run: ./scripts/build.sh
 ```
 
+---
+
 ## Action 引用策略
 
 不要把 SHA pinning 当成所有 workflow 的固定格式。先看 Action 来源、job 权限和被篡改后的后果：
@@ -41,6 +43,8 @@ jobs:
 | Action 接触 secrets、`contents: write`、`id-token: write`、发布、签名或部署 | 优先使用完整 commit SHA，并在旁边注明对应版本；若保留官方 Action 的 major tag，明确这是对发布方的信任选择 |
 
 major tag 可能被维护者更新指向，完整 SHA 则牺牲更新便利换取不可变引用。选择应与实际权限和供应链风险匹配，不要让低风险校验仓库承担无收益的维护成本。
+
+---
 
 ## paths-ignore
 
@@ -56,6 +60,8 @@ on:
 
 注意 `paths-ignore` 与 `paths` 不能同时出现在同一个触发事件下。
 
+---
+
 ## 权限
 
 - 顶层写 `permissions: { contents: read }`，按 job 提升。
@@ -63,9 +69,13 @@ on:
 - 发布类 job 需要 `contents: write` 时，只给那一个 job，不要整体提升。
 - `id-token: write` 只在用 OIDC 换取云厂商凭证时开启。
 
+---
+
 ## 密钥
 
 详见 [log-hygiene.md](log-hygiene.md)。避免输出 secret；原值通常能被日志遮蔽，但编码、截断、拼接等派生值需要在输出前用 `::add-mask::` 单独登记。
+
+---
 
 ## 矩阵
 
@@ -73,14 +83,18 @@ on:
 - 矩阵里每个组合都要有明确目的；把版本号全列一遍通常只是在浪费额度。
 - `include` / `exclude` 写在矩阵内，不要用脚本拼 `matrix`。
 
+---
+
 ## 缓存
 
 - 依赖缓存的 key 通常应包含锁文件哈希，例如 `${{ hashFiles('**/uv.lock') }}`，并包含影响缓存兼容性的运行时和平台信息。
 - 构建结果只有在输入和工具链都能可靠纳入 key 时才适合缓存；无法定义失效条件时优先缓存下载产物。
 
+---
+
 ## 依赖与安全扫描
 
-### dependabot
+### Dependabot
 
 ```yaml
 version: 2
@@ -94,15 +108,17 @@ updates:
         patterns: ["*"]
 ```
 
-- 为仓库实际使用、且希望自动更新的生态配置 dependabot；本 skill 涉及的仓库通常应包含 `github-actions`。
+- 为仓库实际使用、且希望自动更新的生态配置 Dependabot；本 skill 涉及的仓库通常应包含 `github-actions`。
 - 用 `groups` 合并 patch 更新，否则每个小版本都会单独开 PR。
 - 使用 major tag 时让 Dependabot 提醒跨 major 升级；使用完整 SHA 时，审查更新是否对应可信 release，不要只看自动生成的版本注释。
 
 ### CodeQL
 
-- public repo 优先用 Settings → Code security 里的 default setup，不要手写 workflow。
-- private repo 是否能使用 CodeQL 取决于当前 GitHub 方案和安全功能配置；先检查仓库设置，再决定使用 default setup 或 workflow。
+- 公开仓库优先用 Settings → Code security 里的 default setup，不要手写 workflow。
+- 私有仓库是否能使用 CodeQL 取决于当前 GitHub 方案和安全功能配置；先检查仓库设置，再决定使用 default setup 或 workflow。
 - 手写时 `permissions` 至少需要 `security-events: write`。
+
+---
 
 ## 常见失败
 

@@ -23,6 +23,8 @@ echo "$derived"
 
 `add-mask` 只对之后输出的行生效；必须在派生值出现之前执行。
 
+---
+
 ## 压缩体积
 
 ```bash
@@ -42,6 +44,8 @@ fi
 
 `tail` 而不是 `cat`：几百 MB 的日志会让网页卡死，也会让真正的错误滚出视野。
 
+---
+
 ## 高亮
 
 ```bash
@@ -52,6 +56,8 @@ echo "::notice::using fallback mirror"
 
 `file=` / `line=` 会让错误在 PR 的 diff 里可点击跳转。信息里不要带换行，换行会截断注解。
 
+---
+
 ## 分组
 
 ```bash
@@ -61,6 +67,8 @@ echo "::endgroup::"
 ```
 
 长步骤默认展开时会把后面所有内容推走。group 之后默认折叠，失败时用户再点开。
+
+---
 
 ## 输出到 job summary
 

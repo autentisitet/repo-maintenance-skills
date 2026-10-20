@@ -1,8 +1,8 @@
 ---
 name: github-actions-hardening
-description: 编写或修改 GitHub Actions 工作流、dependabot 配置、CodeQL 设置，以及调试 CI 日志输出时使用。覆盖 runner 差异、权限最小化、第三方 Action 的可信性、密钥泄露与日志体积问题。不适用于本地构建脚本或非 GitHub 的 CI 平台。
+description: 编写或修改 GitHub Actions 工作流、Dependabot 配置、CodeQL 设置，以及调试 CI 日志输出时使用。覆盖 runner 差异、权限最小化、第三方 Action 的可信性、密钥泄露与日志体积问题。不适用于本地构建脚本或非 GitHub 的 CI 平台。
 metadata:
-  short-description: workflow、依赖扫描与 CI 日志的加固规范
+  short-description: 审查 workflow 权限、依赖安全、密钥使用和 CI 日志输出
 ---
 
 # GitHub Actions
@@ -10,7 +10,7 @@ metadata:
 | 任务 | Reference |
 | --- | --- |
 | 写或修改 `.github/workflows/*.yml` | [ci.md](references/ci.md) |
-| dependabot、CodeQL | [ci.md](references/ci.md#依赖与安全扫描) |
+| Dependabot、CodeQL | [ci.md](references/ci.md#依赖与安全扫描) |
 | 日志脱敏、压缩、高亮、分组 | [log-hygiene.md](references/log-hygiene.md) |
 
 ## 默认检查项
@@ -19,7 +19,9 @@ metadata:
 - 对可被新提交取代的验证任务，配置 `concurrency:` + `cancel-in-progress: true`。发布、迁移和其他必须完整执行的任务不要照搬。
 - 按风险选择 Action 引用：只读校验流程中的 GitHub 官方 Action 可以使用 major tag；第三方 Action，或接触 secrets、写权限、OIDC、发布与部署的流程，优先固定完整 commit SHA。
 - 跨平台 job 若共享 Bash 脚本，显式设置 `shell: bash`；依赖 PowerShell 或平台原生 shell 的任务保留对应 shell。
-- `timeout-minutes:`。默认 6 小时，卡死时浪费额度。
+- 对可能挂起、调用外部服务或运行时间明显受输入影响的 job，建议设置合理的 `timeout-minutes`。
+
+---
 
 ## 写之前先确认
 
