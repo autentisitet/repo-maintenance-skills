@@ -1,0 +1,4 @@
+interface:
+  display_name: "容器质量"
+  short_description: "统一 Docker/Podman 构建、Compose 覆盖、SELinux 与日志轮转"
+  default_prompt: "Use $container-quality to build or review this Docker/Podman Compose setup across CPU, GPU, Ubuntu, and Fedora."

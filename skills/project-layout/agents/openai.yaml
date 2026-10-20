@@ -1,0 +1,4 @@
+interface:
+  display_name: "项目目录组织"
+  short_description: "组织前后端、部署配置、测试、脚本、示例、文档和训练代码目录"
+  default_prompt: "Use $project-layout to organize or review this project's directory structure and update affected paths."
