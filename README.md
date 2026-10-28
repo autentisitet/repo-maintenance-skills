@@ -1,32 +1,38 @@
 # repo-maintenance-skills
 
-一组面向 Codex 的仓库维护 skills，将常用工程约定整理成可复用的操作流程，覆盖文档、GitHub
-Actions、仓库配置、项目目录、前后端质量以及 Docker/Podman 部署。
+[English](README.md) | [中文](README_zh.md)
 
-项目优先服务作者的实际工作流，部分目录、部署和工具选择属于明确的项目约定，不作为适合所有仓库的
-通用最佳实践。这是非官方项目，与 OpenAI 不存在隶属或背书关系，也不承诺兼容 Codex 之外的 agent。
+A set of Codex repo-maintenance skills that turn common engineering conventions into reusable
+workflows, covering documentation, GitHub Actions, repository configuration, project layout,
+frontend/backend quality, and Docker/Podman deployment.
+
+The project prioritizes the author's actual workflows. Some directory, deployment, and tool choices
+are explicit project conventions rather than general best practices suitable for every repository.
+This is an unofficial project with no affiliation with or endorsement by OpenAI, and it does not
+promise compatibility with agents other than Codex.
 
 ## Skills
 
-| Skill | 用途 |
+| Skill | Purpose |
 | --- | --- |
-| [codex-skill-authoring](skills/codex-skill-authoring/SKILL.md) | 创建、审查和精简 Codex skill |
-| [markdown-docs](skills/markdown-docs/SKILL.md) | README、CHANGELOG、CONTRIBUTING、issue 模板等仓库文档 |
-| [github-actions-hardening](skills/github-actions-hardening/SKILL.md) | workflow、Dependabot、CodeQL 和 CI 日志 |
-| [github-repo-management](skills/github-repo-management/SKILL.md) | branch、分批 commit、测试建议和 GitHub 仓库管理 |
-| [repo-hygiene](skills/repo-hygiene/SKILL.md) | dotfiles、忽略规则、依赖导出和锁文件同步 |
-| [project-layout](skills/project-layout/SKILL.md) | 组织前后端、部署配置、测试、脚本、示例、文档和训练代码目录 |
-| [container-quality](skills/container-quality/SKILL.md) | Docker/Podman 共用构建、Compose 覆盖、SELinux 和日志轮转 |
-| [backend-quality](skills/backend-quality/SKILL.md) | 后端接口契约、FastAPI OpenAPI、迁移、测试和 Nginx 公网入口 |
-| [frontend-quality](skills/frontend-quality/SKILL.md) | HTML/CSS 取值收敛、渲染验证和可访问性 |
+| [codex-skill-authoring](skills/codex-skill-authoring/SKILL.md) | Create, review, and simplify Codex skills |
+| [markdown-docs](skills/markdown-docs/SKILL.md) | Repository docs such as README, CHANGELOG, CONTRIBUTING, and issue templates |
+| [github-actions-hardening](skills/github-actions-hardening/SKILL.md) | Workflows, Dependabot, CodeQL, and CI logs |
+| [github-repo-management](skills/github-repo-management/SKILL.md) | Branches, batched commits, test suggestions, and GitHub repository management |
+| [repo-hygiene](skills/repo-hygiene/SKILL.md) | Dotfiles, ignore rules, dependency exports, and lockfile sync |
+| [project-layout](skills/project-layout/SKILL.md) | Organize frontend, backend, deployment config, tests, scripts, examples, docs, and training code |
+| [container-quality](skills/container-quality/SKILL.md) | Shared Docker/Podman builds, Compose overrides, SELinux, and log rotation |
+| [backend-quality](skills/backend-quality/SKILL.md) | Backend API contracts, FastAPI OpenAPI, migrations, tests, code standards, and the Nginx public entry point |
+| [frontend-quality](skills/frontend-quality/SKILL.md) | HTML/CSS value convergence, render verification, and accessibility |
 
-安装后可以用诸如 `$markdown-docs` 这类名称显式调用，也可以由 description 自动匹配。
+After installation, you can invoke them explicitly with names such as `$markdown-docs`, or let the
+description auto-match.
 
 ---
 
-## 安装
+## Installation
 
-### macOS、Linux 与 WSL
+### macOS, Linux, and WSL
 
 ```bash
 git clone https://github.com/autentisitet/repo-maintenance-skills.git ~/repo-maintenance-skills
@@ -34,7 +40,8 @@ cd ~/repo-maintenance-skills
 ./scripts/install.sh
 ```
 
-默认把 `skills/*` 软链接到 `${CODEX_HOME:-~/.codex}/skills`。需要独立副本时使用：
+By default, `skills/*` is symlinked into `${CODEX_HOME:-~/.codex}/skills`. For an independent copy,
+use:
 
 ```bash
 ./scripts/install.sh --copy
@@ -48,33 +55,35 @@ Set-Location "$HOME\repo-maintenance-skills"
 .\scripts\install.ps1
 ```
 
-默认创建目录 junction；需要独立副本时使用 `.\scripts\install.ps1 -Copy`。
+Directory junctions are created by default; for an independent copy, use
+`.\scripts\install.ps1 -Copy`.
 
-`--force` / `-Force` 只替换指向当前仓库的链接或带本项目安装标记的复制副本。遇到来源未知的同名
-目录时会停止，避免删除用户自行维护的 skill。
+`--force` / `-Force` only replaces links that point at this repository or copies marked by this
+project's installation marker. When it encounters a same-named directory of unknown origin, it
+stops to avoid deleting a skill the user maintains themselves.
 
 ---
 
-## 更新
+## Updating
 
-软链接或 junction 安装时，拉取仓库更新即可生效：
+Symlink or junction installs take effect after pulling the repository:
 
 ```bash
 git pull
 ```
 
-复制安装需要重新覆盖对应副本：
+Copy installs need to overwrite the corresponding copy again:
 
 ```bash
 ./scripts/install.sh --copy --force
 ```
 
-Windows 使用 `.\scripts\install.ps1 -Copy -Force`。只有本项目创建的链接或带安装标记的复制副本
-会被替换。
+On Windows use `.\scripts\install.ps1 -Copy -Force`. Only links created by this project or copies
+marked with the installation marker will be replaced.
 
 ---
 
-## 结构
+## Structure
 
 ```text
 repo-maintenance-skills/
@@ -98,11 +107,12 @@ repo-maintenance-skills/
         └── assets/
 ```
 
-除 `SKILL.md` 外的目录按需创建，不保留空目录或占位文件。
+Directories other than `SKILL.md` are created as needed; empty directories and placeholder files
+are not kept.
 
 ---
 
-## 校验
+## Validation
 
 ```bash
 python3 -m pip install -r requirements.txt
@@ -114,26 +124,31 @@ python3 skills/markdown-docs/scripts/section-dividers.py --check .
 bash -n scripts/install.sh skills/*/scripts/*.sh
 ```
 
-校验器使用真实 YAML 解析检查 frontmatter、目录命名、内部链接和 `agents/openai.yaml`。eval 校验只
-确认 [evals/cases.yaml](evals/cases.yaml) 的五类用例覆盖完整；它不调用模型，也不能证明 skill 会正确
-触发或执行。行为验证方法见 [evals/README.md](evals/README.md)。
+The validator uses real YAML parsing to check frontmatter, directory naming, internal links, and
+`agents/openai.yaml`. The eval validation only confirms that [evals/cases.yaml](evals/cases.yaml)
+covers the five case categories completely; it does not call a model and cannot prove that a skill
+will trigger or execute correctly. See [evals/README.md](evals/README.md) for behavior verification.
 
-新增或修改 skill 时可以调用 `$codex-skill-authoring`，再运行以上校验。
+When adding or modifying a skill, you can invoke `$codex-skill-authoring` and then run the checks
+above.
 
 ---
 
-## 设计约定
+## Design conventions
 
-- **个人工作流优先。** 个人的重复需求、术语和偏好可以直接成为约束，不为追求通用性而改写。
-- **只写会改变决策的信息。** 不重复 Codex 已有的基础能力和通用教程。
-- **按需拆分。** `SKILL.md` 保留共用约束，条件性细节放进 `references/`，确定性操作放进
-  `scripts/`。
-- **措辞与约束强度一致。** 安全和正确性要求使用“必须/不要”，最低范围使用“至少”，经验性做法
-  使用“建议/推荐/通常”，条件任务使用“如果/当……时”。
-- **控制上下文成本。** 少量有实际增益的 skill 比大量薄 skill 更有价值。
+- **Personal workflow first.** Personal repeated needs, terminology, and preferences can directly
+  become constraints; don't rewrite them for generality.
+- **Only write information that changes decisions.** Don't repeat basic capabilities and generic
+  tutorials that Codex already has.
+- **Split on demand.** `SKILL.md` keeps shared constraints; conditional details go into
+  `references/`; deterministic operations go into `scripts/`.
+- **Keep wording consistent with constraint strength.** Safety and correctness requirements use
+  "must/never"; minimum scope uses "at least"; experiential practices use "recommend/usually";
+  conditional tasks use "if/when".
+- **Control context cost.** A few skills with real gains are more valuable than many thin skills.
 
 ---
 
 ## License
 
-本项目采用 [MIT License](LICENSE)。
+This project is licensed under the [MIT License](LICENSE).

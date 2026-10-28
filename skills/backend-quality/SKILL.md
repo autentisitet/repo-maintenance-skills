@@ -1,11 +1,23 @@
 ---
 name: backend-quality
-description: 当项目明确采用本仓库的 FastAPI、Nginx 与 Docker/Podman 后端约定时，用于编写、修改或审查 API、OpenAPI 产物、文件上传、数据库迁移和自动化测试。不用于 serverless、托管网关、其他公网入口方案或未采用该部署模型的普通后端项目。
+description: 当项目明确采用本仓库的 FastAPI、Nginx 与 Docker/Podman 后端约定时，用于编写、修改或审查 API、OpenAPI 产物、文件上传、数据库迁移、自动化测试和后端代码规范。不用于 serverless、托管网关、其他公网入口方案或未采用该部署模型的普通后端项目。
 metadata:
-  short-description: 检查后端接口、文件上传、FastAPI OpenAPI、迁移与 Nginx 入口
+  short-description: 检查后端接口、文件上传、OpenAPI、迁移、Nginx 入口与代码规范
 ---
 
 # 后端质量
+
+## 代码规范
+
+- 代码满足业界通行规范（Python 优先 PEP 8，类型标注按项目约定）；项目已有 lint、format 或
+  type check 配置时保持一致，不要另设一套。
+- 变量名、参数名、函数名和类名必须可读并准确表达用途。只保留领域通行且无歧义的缩写，不要用
+  单字母变量、含糊命名或拼写不一致的名字。
+- 函数保持单一职责。有复杂逻辑或调用抽象 API 的函数必须写注释或 docstring，说明意图、前置
+  条件、副作用、非显然的参数与返回值和失败模式；简单自解释代码不要机械补注释。
+- 注释解释“为什么”，不要逐行复述代码“做了什么”。
+
+---
 
 ## 接口契约
 
