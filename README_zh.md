@@ -80,16 +80,12 @@ Windows 使用 `.\scripts\install.ps1 -Copy -Force`。只有本项目创建的�
 
 ```text
 repo-maintenance-skills/
-├── evals/
-│   ├── README.md
-│   └── cases.yaml
 ├── requirements.txt
 ├── scripts/
 │   ├── install.sh
 │   ├── install.ps1
 │   ├── test_skill_examples.py
 │   ├── test_validate_skills.py
-│   ├── validate_skill_evals.py
 │   └── validate_skills.py
 └── skills/
     └── <skill-name>/
@@ -111,14 +107,11 @@ python3 -m pip install -r requirements.txt
 python3 scripts/validate_skills.py
 python3 scripts/test_validate_skills.py
 python3 scripts/test_skill_examples.py
-python3 scripts/validate_skill_evals.py
 python3 skills/markdown-docs/scripts/section-dividers.py --check .
 bash -n scripts/install.sh skills/*/scripts/*.sh
 ```
 
-校验器使用真实 YAML 解析检查 frontmatter、目录命名、内部链接和 `agents/openai.yaml`。eval 校验只
-确认 [evals/cases.yaml](evals/cases.yaml) 的五类用例覆盖完整；它不调用模型，也不能证明 skill 会正确
-触发或执行。行为验证方法见 [evals/README.md](evals/README.md)。
+校验器使用真实 YAML 解析检查 frontmatter、目录命名、内部链接和 `agents/openai.yaml`。
 
 新增或修改 skill 时可以调用 `$codex-skill-authoring`，再运行以上校验。
 

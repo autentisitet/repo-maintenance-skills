@@ -58,7 +58,6 @@ metadata:
 python3 scripts/validate_skills.py
 python3 scripts/test_validate_skills.py
 python3 scripts/test_skill_examples.py
-python3 scripts/validate_skill_evals.py
 python3 skills/markdown-docs/scripts/section-dividers.py --check .
 bash -n scripts/install.sh skills/*/scripts/*.sh
 ```

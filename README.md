@@ -87,16 +87,12 @@ marked with the installation marker will be replaced.
 
 ```text
 repo-maintenance-skills/
-├── evals/
-│   ├── README.md
-│   └── cases.yaml
 ├── requirements.txt
 ├── scripts/
 │   ├── install.sh
 │   ├── install.ps1
 │   ├── test_skill_examples.py
 │   ├── test_validate_skills.py
-│   ├── validate_skill_evals.py
 │   └── validate_skills.py
 └── skills/
     └── <skill-name>/
@@ -119,15 +115,12 @@ python3 -m pip install -r requirements.txt
 python3 scripts/validate_skills.py
 python3 scripts/test_validate_skills.py
 python3 scripts/test_skill_examples.py
-python3 scripts/validate_skill_evals.py
 python3 skills/markdown-docs/scripts/section-dividers.py --check .
 bash -n scripts/install.sh skills/*/scripts/*.sh
 ```
 
 The validator uses real YAML parsing to check frontmatter, directory naming, internal links, and
-`agents/openai.yaml`. The eval validation only confirms that [evals/cases.yaml](evals/cases.yaml)
-covers the five case categories completely; it does not call a model and cannot prove that a skill
-will trigger or execute correctly. See [evals/README.md](evals/README.md) for behavior verification.
+`agents/openai.yaml`.
 
 When adding or modifying a skill, you can invoke `$codex-skill-authoring` and then run the checks
 above.
