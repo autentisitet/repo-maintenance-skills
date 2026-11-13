@@ -1,0 +1,61 @@
+﻿id,skill,category,query,should_trigger
+backend-v01,backend-quality,direct,检查本项目 FastAPI 上传端点的魔数校验、大小限制和 Nginx 配置。,True
+backend-v02,backend-quality,indirect,请按本仓库后端约定说明：数据库改表不能在启动时偷偷执行，怎么改成可审查 migration 并补回滚验证。,True
+backend-v03,backend-quality,embedded,请按本仓库后端约定说明准备发布时要更新哪些接口契约、测哪些鉴权失败路径，以及怎么从既有 Nginx 公网入口验证健康检查。,True
+backend-v04,backend-quality,boundary,为 Cloudflare Worker 编写 TypeScript API，不使用 FastAPI 或 Nginx。,False
+backend-v05,backend-quality,boundary,数据库文章中有一句 FastAPI 示例，请只校对中文。,False
+backend-v06,backend-quality,boundary,调整 GitHub Actions 中 PostgreSQL service 的版本号。,False
+author-v01,codex-skill-authoring,direct,请按本仓库 skill 编写约定说明 skill 的 gotchas、workflow 和 report structure 该怎么写，以及如何验证资源链接。,True
+author-v02,codex-skill-authoring,indirect,请按本仓库 eval 约定说明：技能总在不相关请求上触发时，怎么收窄 description 并补哪些 validation negatives。,True
+author-v03,codex-skill-authoring,embedded,请按本仓库 skill 编写约定说明维护现有能力包时，如何检查脚本可发现性、以及确定性操作是否仍写成自然语言。,True
+author-v04,codex-skill-authoring,boundary,列出可安装的第三方 skills。,False
+author-v05,codex-skill-authoring,boundary,编写普通 GitHub Actions workflow，里面运行 skill 测试命令。,False
+author-v06,codex-skill-authoring,boundary,解释游戏角色的 skill tree 设计。,False
+container-v01,container-quality,direct,验证四套 Compose 组合都能解析，并检查日志轮转和 SELinux 标签。,True
+container-v02,container-quality,indirect,请按本仓库容器约定说明：GPU 覆盖把服务名写错了、Podman 配置还意外发布了 Redis 端口，该怎么改。,True
+container-v03,container-quality,embedded,请按本仓库固定容器布局说明修部署时要检查构建、停止行为、挂载权限的哪些点。,True
+container-v04,container-quality,boundary,将应用部署到 Kubernetes Operator，不保留 Compose。,False
+container-v05,container-quality,boundary,给 Docker 主题博客做拼写检查。,False
+container-v06,container-quality,boundary,只修改镜像仓库的 GitHub About 文案。,False
+frontend-v01,frontend-quality,direct,请按本仓库前端约定检查表单 label、键盘 focus 和 WCAG AA 对比度，并说明该截哪些移动端图。,True
+frontend-v02,frontend-quality,indirect,请按本仓库前端约定说明：CSS 有几十个近似间距值、hover 时布局跳动，该怎么收敛。,True
+frontend-v03,frontend-quality,embedded,请按本仓库前端约定说明交付静态工具前要检查哪些真实渲染、断点两侧和暗色模式。,True
+frontend-v04,frontend-quality,boundary,为 React hooks 设计缓存算法，不涉及 UI。,False
+frontend-v05,frontend-quality,boundary,把截图文件上传到 release，不审查页面。,False
+frontend-v06,frontend-quality,boundary,修改后端模板返回的 JSON 字段名。,False
+actions-v01,github-actions-hardening,direct,请按本仓库 GitHub Actions 加固规则检查 Actions workflow 是否把 secrets 暴露给 fork PR。,True
+actions-v02,github-actions-hardening,indirect,请按本仓库 GitHub Actions 加固规则说明：CI 只在部分改动时静默跳过，可能是 paths-ignore 忽略了测试输入，该怎么查。,True
+actions-v03,github-actions-hardening,embedded,请按本仓库 GitHub Actions 加固规则说明：新增发布检查时要限制哪些权限、如何固定高风险 Action、怎么避免输出请求头。,True
+actions-v04,github-actions-hardening,boundary,配置 Azure DevOps pipeline。,False
+actions-v05,github-actions-hardening,boundary,只修改本地 Makefile 的 timeout 参数。,False
+actions-v06,github-actions-hardening,boundary,在 CHANGELOG 提到 CI 已通过。,False
+repo-v01,github-repo-management,direct,请按本仓库仓库管理约定为这批改动推荐 branch、commit 分组和测试命令。,True
+repo-v02,github-repo-management,indirect,仓库的 About 描述和 topics 与 README 内容不符。先根据仓库现状推荐合适的描述与标签，不要修改远端。,True
+repo-v03,github-repo-management,embedded,请按本仓库仓库管理约定说明准备开源发布时要核对 license 的哪些方面、About/topics 怎么选、提交怎么规划。,True
+repo-v04,github-repo-management,boundary,实现 git clone 的教学版协议客户端。,False
+repo-v05,github-repo-management,boundary,审查 PR 的 SQL 注入风险，不做仓库设置操作。,False
+repo-v06,github-repo-management,boundary,修改网页上的 GitHub 图标颜色。,False
+docs-v01,markdown-docs,direct,请按本仓库 Markdown 约定说明同步更新中英文 README 时要保持哪些结构、代码块和 badge 一致。,True
+docs-v02,markdown-docs,indirect,请按本仓库 Markdown 约定说明：GitHub 上 Mermaid 不显示、本地预览正常时，该怎么按目标渲染器修仓库文档。,True
+docs-v03,markdown-docs,embedded,请按本仓库 Markdown 约定说明整理发布文档时要校验哪些相对链接、标题锚点和 markdownlint 规则。,True
+docs-v04,markdown-docs,boundary,给 TypeScript 类型加 TSDoc。,False
+docs-v05,markdown-docs,boundary,解析用户上传的 Markdown 为 HTML。,False
+docs-v06,markdown-docs,boundary,修改网页 footer 的版权文字。,False
+layout-v01,project-layout,direct,项目明确采用本仓库布局；请说明训练配置怎么移到 train-config，以及要更新哪些引用。,True
+layout-v02,project-layout,indirect,FastAPI 服务和模型核心复制了两份实现；请说明按 deploy/src 边界该怎么整理。,True
+layout-v03,project-layout,embedded,完成固定目录迁移后，请说明要运行哪些检查，以及怎么确认没有旧副本或敏感样例。,True
+layout-v04,project-layout,boundary,用户明确要求保持 Cargo workspace 原生布局。,False
+layout-v05,project-layout,boundary,只给目录命名写一段设计建议，不改项目。,False
+layout-v06,project-layout,boundary,修复 tests 目录中的失败断言，不移动文件。,False
+hygiene-v01,repo-hygiene,direct,请按本仓库 repo-hygiene 约定审查 .dockerignore 是否错误复用了 .gitignore。,True
+hygiene-v02,repo-hygiene,indirect,请按本仓库 dotfiles 约定说明：环境文件否定规则顺序错了、.env.example 也被忽略时该怎么改。,True
+hygiene-v03,repo-hygiene,embedded,请按本仓库 dotfiles 约定说明新建仓库时最小 dotfiles 该怎么建，以及如何从 uv.lock 可重复导出依赖。,True
+hygiene-v04,repo-hygiene,boundary,升级应用运行时依赖并重构调用代码。,False
+hygiene-v05,repo-hygiene,boundary,README 解释 .gitignore 的作用，只写文档。,False
+hygiene-v06,repo-hygiene,boundary,为业务数据库设计清理任务。,False
+ps-v01,powershell-quality,direct,请按本仓库 PowerShell 约定审查这个脚本的参数设计（-Verbose/-WhatIf/-Confirm）和 splatting。,True
+ps-v02,powershell-quality,indirect,Set-ExecutionPolicy 和注册表改动能不能直接写进脚本？请按本仓库约定说明。,True
+ps-v03,powershell-quality,embedded,写一个用 CIM 查询服务、try/catch 处理失败并释放句柄的脚本。,True
+ps-v04,powershell-quality,boundary,写一个 Bash 脚本重启服务。,False
+ps-v05,powershell-quality,boundary,解释 PowerShell 的自动变量 $Error，不做脚本修改。,False
+ps-v06,powershell-quality,boundary,为网页配置 Nginx 反向代理。,False

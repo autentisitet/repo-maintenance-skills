@@ -1,0 +1,707 @@
+{
+  "version": 1,
+  "split": "train",
+  "split_seed": 20261111,
+  "queries": [
+    {
+      "id": "backend-t01",
+      "skill": "backend-quality",
+      "category": "direct",
+      "query": "请说明按本仓库的 FastAPI、Nginx 和 Docker 约定，一个头像上传接口应该怎么设计：入口方式、大小限制和文件校验分别怎么做，以及为什么应用端口不能公网直连。",
+      "should_trigger": true
+    },
+    {
+      "id": "backend-t02",
+      "skill": "backend-quality",
+      "category": "indirect",
+      "query": "路由改了之后，请按本仓库后端约定说明 OpenAPI 该怎样同步生成，以及为什么应用端口不能从公网直连。",
+      "should_trigger": true
+    },
+    {
+      "id": "backend-t03",
+      "skill": "backend-quality",
+      "category": "embedded",
+      "query": "请说明完成用户资料功能时，数据库迁移、上传校验和 API 集成测试分别要按仓库的哪些规则做。项目沿用仓库现有部署方式。",
+      "should_trigger": true
+    },
+    {
+      "id": "backend-t04",
+      "skill": "backend-quality",
+      "category": "direct",
+      "query": "审查 FastAPI 事务边界和 migration，服务前面是本项目规定的 nginx。",
+      "should_trigger": true
+    },
+    {
+      "id": "backend-t05",
+      "skill": "backend-quality",
+      "category": "indirect",
+      "query": "上传接口偶尔把超大文件读进内存，而且 openapi.json 已经过期；请说明按本仓库约定该怎么修，以及修复时要检查哪些边界。",
+      "should_trigger": true
+    },
+    {
+      "id": "backend-t06",
+      "skill": "backend-quality",
+      "category": "boundary",
+      "query": "给 AWS Lambda 写一个不使用容器和 Nginx 的 Python handler。",
+      "should_trigger": false
+    },
+    {
+      "id": "backend-t07",
+      "skill": "backend-quality",
+      "category": "boundary",
+      "query": "README 里把 FastAPI 拼错了，只改这一处文字。",
+      "should_trigger": false
+    },
+    {
+      "id": "backend-t08",
+      "skill": "backend-quality",
+      "category": "boundary",
+      "query": "设计一个由 API Gateway 托管公网入口的 serverless API，不采用仓库后端部署约定。",
+      "should_trigger": false
+    },
+    {
+      "id": "backend-t09",
+      "skill": "backend-quality",
+      "category": "boundary",
+      "query": "帮我为纯 Flask 教程补一段代码注释，不改接口或部署。",
+      "should_trigger": false
+    },
+    {
+      "id": "backend-t10",
+      "skill": "backend-quality",
+      "category": "boundary",
+      "query": "只调整 PostgreSQL logo 在网页里的大小。",
+      "should_trigger": false
+    },
+    {
+      "id": "author-t01",
+      "skill": "codex-skill-authoring",
+      "category": "direct",
+      "query": "请规划如何给本仓库新增一个 Codex skill：应包含哪些文件、description 怎么写、agents/openai.yaml 怎么配。",
+      "should_trigger": true
+    },
+    {
+      "id": "author-t02",
+      "skill": "codex-skill-authoring",
+      "category": "indirect",
+      "query": "这份技能说明太长了；请按本仓库 skill 编写约定说明什么时候该把条件细节拆到 references，以及如何降低上下文成本。",
+      "should_trigger": true
+    },
+    {
+      "id": "author-t03",
+      "skill": "codex-skill-authoring",
+      "category": "embedded",
+      "query": "整理仓库维护能力时，请按本仓库约定说明怎么重写 skill description，以及该补哪些负面路由测试。",
+      "should_trigger": true
+    },
+    {
+      "id": "author-t04",
+      "skill": "codex-skill-authoring",
+      "category": "direct",
+      "query": "请按本仓库 skill 编写约定 review 这个 SKILL.md，检查渐进披露、脚本可发现性和 agents/openai.yaml。",
+      "should_trigger": true
+    },
+    {
+      "id": "author-t05",
+      "skill": "codex-skill-authoring",
+      "category": "indirect",
+      "query": "我们有十几个重叠的 skills；请按本仓库 skill 编写约定说明怎么合并职责并设计退出边界。",
+      "should_trigger": true
+    },
+    {
+      "id": "author-t06",
+      "skill": "codex-skill-authoring",
+      "category": "boundary",
+      "query": "从第三方 GitHub 仓库安装一个现成 skill。",
+      "should_trigger": false
+    },
+    {
+      "id": "author-t07",
+      "skill": "codex-skill-authoring",
+      "category": "boundary",
+      "query": "写普通项目 README，文中会提到 skill 这个词。",
+      "should_trigger": false
+    },
+    {
+      "id": "author-t08",
+      "skill": "codex-skill-authoring",
+      "category": "boundary",
+      "query": "给 Python 函数写一个名为 skill_score 的实现。",
+      "should_trigger": false
+    },
+    {
+      "id": "author-t09",
+      "skill": "codex-skill-authoring",
+      "category": "boundary",
+      "query": "安装并配置一个 MCP server，不创建或修改技能包。",
+      "should_trigger": false
+    },
+    {
+      "id": "author-t10",
+      "skill": "codex-skill-authoring",
+      "category": "boundary",
+      "query": "把用户手册翻译成中文，其中有 Agent Skills 章节。",
+      "should_trigger": false
+    },
+    {
+      "id": "container-t01",
+      "skill": "container-quality",
+      "category": "direct",
+      "query": "请说明按仓库约定应维护哪四个 Compose 覆盖文件、默认选 CPU 还是 GPU，以及为什么。",
+      "should_trigger": true
+    },
+    {
+      "id": "container-t02",
+      "skill": "container-quality",
+      "category": "indirect",
+      "query": "请按本仓库 Docker/Podman 约定排查：Fedora Enforcing 下 bind mount 不能写、Podman rootless 容器启动失败。",
+      "should_trigger": true
+    },
+    {
+      "id": "container-t03",
+      "skill": "container-quality",
+      "category": "embedded",
+      "query": "上线服务前检查镜像构建、健康检查、日志轮转和内部数据库端口。项目使用固定 Compose 布局。",
+      "should_trigger": true
+    },
+    {
+      "id": "container-t04",
+      "skill": "container-quality",
+      "category": "direct",
+      "query": "请按本仓库容器约定审查 docker compose 配置：默认 CPU，只有显式开启时才走 GPU。",
+      "should_trigger": true
+    },
+    {
+      "id": "container-t05",
+      "skill": "container-quality",
+      "category": "indirect",
+      "query": "请按本仓库容器约定说明：同一台机器装了 docker 和 podman、Makefile 混用 compose 前端时该怎么选。",
+      "should_trigger": true
+    },
+    {
+      "id": "container-t06",
+      "skill": "container-quality",
+      "category": "boundary",
+      "query": "为 Kubernetes 集群编写 Helm chart 和 NetworkPolicy。",
+      "should_trigger": false
+    },
+    {
+      "id": "container-t07",
+      "skill": "container-quality",
+      "category": "boundary",
+      "query": "比较 ECS Fargate 与 Cloud Run 的价格，不修改容器配置。",
+      "should_trigger": false
+    },
+    {
+      "id": "container-t08",
+      "skill": "container-quality",
+      "category": "boundary",
+      "query": "README 中 Docker 一词需要改成 containers，只改文案。",
+      "should_trigger": false
+    },
+    {
+      "id": "container-t09",
+      "skill": "container-quality",
+      "category": "boundary",
+      "query": "创建一个不使用 Compose 的单文件教学 Dockerfile。",
+      "should_trigger": false
+    },
+    {
+      "id": "container-t10",
+      "skill": "container-quality",
+      "category": "boundary",
+      "query": "修复 Python 单元测试，失败日志碰巧来自容器环境。",
+      "should_trigger": false
+    },
+    {
+      "id": "frontend-t01",
+      "skill": "frontend-quality",
+      "category": "direct",
+      "query": "请按本仓库前端约定审查这个静态 HTML/CSS 页面，并说明该用哪些尺寸截图确认渲染。",
+      "should_trigger": true
+    },
+    {
+      "id": "frontend-t02",
+      "skill": "frontend-quality",
+      "category": "indirect",
+      "query": "请按本仓库前端约定说明：390px 下按钮文字溢出、暗色模式对比度不足该怎么查。",
+      "should_trigger": true
+    },
+    {
+      "id": "frontend-t03",
+      "skill": "frontend-quality",
+      "category": "embedded",
+      "query": "请按本仓库前端约定说明结算页交付前要检查哪些交互状态、视口和暗色模式，该用哪些尺寸截图。",
+      "should_trigger": true
+    },
+    {
+      "id": "frontend-t04",
+      "skill": "frontend-quality",
+      "category": "direct",
+      "query": "请按本仓库前端约定说明如何用 audit-css-values.sh 收敛散落的 padding/radius/颜色，以及新增 token 前该检查什么。",
+      "should_trigger": true
+    },
+    {
+      "id": "frontend-t05",
+      "skill": "frontend-quality",
+      "category": "indirect",
+      "query": "请按本仓库前端约定说明：页面文字被卡片遮住时该怎么启动并截图定位。",
+      "should_trigger": true
+    },
+    {
+      "id": "frontend-t06",
+      "skill": "frontend-quality",
+      "category": "boundary",
+      "query": "选择 React 状态管理库并比较 API 设计。",
+      "should_trigger": false
+    },
+    {
+      "id": "frontend-t07",
+      "skill": "frontend-quality",
+      "category": "boundary",
+      "query": "后端返回的 HTML 字符串需要做 XSS 清理，不涉及页面样式。",
+      "should_trigger": false
+    },
+    {
+      "id": "frontend-t08",
+      "skill": "frontend-quality",
+      "category": "boundary",
+      "query": "README 里插入一张前端截图并调整 Markdown。",
+      "should_trigger": false
+    },
+    {
+      "id": "frontend-t09",
+      "skill": "frontend-quality",
+      "category": "boundary",
+      "query": "为组件库设计 TypeScript public API，不写 HTML 或 CSS。",
+      "should_trigger": false
+    },
+    {
+      "id": "frontend-t10",
+      "skill": "frontend-quality",
+      "category": "boundary",
+      "query": "只修复 Playwright 测试中的登录 mock 数据。",
+      "should_trigger": false
+    },
+    {
+      "id": "actions-t01",
+      "skill": "github-actions-hardening",
+      "category": "direct",
+      "query": "请按本仓库 GitHub Actions 加固规则说明发布 workflow 应如何设置 permissions、OIDC 和 Action 引用。",
+      "should_trigger": true
+    },
+    {
+      "id": "actions-t02",
+      "skill": "github-actions-hardening",
+      "category": "indirect",
+      "query": "请按本仓库 GitHub Actions 加固规则评估：fork PR 在 pull_request_target 里 checkout 用户分支并读取 secret 有什么风险。",
+      "should_trigger": true
+    },
+    {
+      "id": "actions-t03",
+      "skill": "github-actions-hardening",
+      "category": "embedded",
+      "query": "请按本仓库 GitHub Actions 加固规则说明：CI 任务会挂住、日志巨大，以及 Dependabot/CodeQL 该分别怎么检查和加固。",
+      "should_trigger": true
+    },
+    {
+      "id": "actions-t04",
+      "skill": "github-actions-hardening",
+      "category": "direct",
+      "query": "请按本仓库 GitHub Actions 加固规则审查 workflow 的 permissions、concurrency、timeout 和跨平台 shell。",
+      "should_trigger": true
+    },
+    {
+      "id": "actions-t05",
+      "skill": "github-actions-hardening",
+      "category": "indirect",
+      "query": "请按本仓库 GitHub Actions 加固规则说明：发布 job 把派生 token 打进日志、第三方 action 只固定 tag 该怎么改。",
+      "should_trigger": true
+    },
+    {
+      "id": "actions-t06",
+      "skill": "github-actions-hardening",
+      "category": "boundary",
+      "query": "为 GitLab CI 写 pipeline。",
+      "should_trigger": false
+    },
+    {
+      "id": "actions-t07",
+      "skill": "github-actions-hardening",
+      "category": "boundary",
+      "query": "本地 bash 构建脚本失败，仓库没有 GitHub Actions。",
+      "should_trigger": false
+    },
+    {
+      "id": "actions-t08",
+      "skill": "github-actions-hardening",
+      "category": "boundary",
+      "query": "解释 README 中 GitHub Actions badge 的文字含义。",
+      "should_trigger": false
+    },
+    {
+      "id": "actions-t09",
+      "skill": "github-actions-hardening",
+      "category": "boundary",
+      "query": "修改 Jenkinsfile 的 stages 和 agent 标签。",
+      "should_trigger": false
+    },
+    {
+      "id": "actions-t10",
+      "skill": "github-actions-hardening",
+      "category": "boundary",
+      "query": "审查业务代码里的 token 解析函数，不改 CI。",
+      "should_trigger": false
+    },
+    {
+      "id": "repo-t01",
+      "skill": "github-repo-management",
+      "category": "direct",
+      "query": "请按本仓库仓库管理约定规划分支和分批提交，并说明重命名 GitHub 仓库要展示哪些命令和影响。",
+      "should_trigger": true
+    },
+    {
+      "id": "repo-t02",
+      "skill": "github-repo-management",
+      "category": "indirect",
+      "query": "我们准备将 GitHub 仓库从私有改为公开。先别改设置，帮我核对当前 visibility、协作者访问和仓库规则，并列出可能受到影响的地方。",
+      "should_trigger": true
+    },
+    {
+      "id": "repo-t03",
+      "skill": "github-repo-management",
+      "category": "embedded",
+      "query": "请按本仓库仓库管理约定规划本次改动的分批提交，并说明更新 About 和 topics 前该先确认什么。",
+      "should_trigger": true
+    },
+    {
+      "id": "repo-t04",
+      "skill": "github-repo-management",
+      "category": "direct",
+      "query": "检查 gh 登录和目标 owner，准备创建远程仓库但先不要写。",
+      "should_trigger": true
+    },
+    {
+      "id": "repo-t05",
+      "skill": "github-repo-management",
+      "category": "indirect",
+      "query": "仓库要调整 license，请先核对代码权属、贡献者协议和现有许可，再说明改动前需要确认的事项。",
+      "should_trigger": true
+    },
+    {
+      "id": "repo-t06",
+      "skill": "github-repo-management",
+      "category": "boundary",
+      "query": "审查 PR 里的支付逻辑 bug。",
+      "should_trigger": false
+    },
+    {
+      "id": "repo-t07",
+      "skill": "github-repo-management",
+      "category": "boundary",
+      "query": "实现一个 GitHub OAuth 登录接口。",
+      "should_trigger": false
+    },
+    {
+      "id": "repo-t08",
+      "skill": "github-repo-management",
+      "category": "boundary",
+      "query": "README 里补一个仓库链接，不操作远程设置或提交计划。",
+      "should_trigger": false
+    },
+    {
+      "id": "repo-t09",
+      "skill": "github-repo-management",
+      "category": "boundary",
+      "query": "修复 git parser 库中的单元测试。",
+      "should_trigger": false
+    },
+    {
+      "id": "repo-t10",
+      "skill": "github-repo-management",
+      "category": "boundary",
+      "query": "只解释 merge sort 算法，示例变量名叫 repository。",
+      "should_trigger": false
+    },
+    {
+      "id": "docs-t01",
+      "skill": "markdown-docs",
+      "category": "direct",
+      "query": "请按本仓库 Markdown 约定说明重写 README 时要同步哪些内容、中英双语版如何保持一致，以及 badge 该怎么选。",
+      "should_trigger": true
+    },
+    {
+      "id": "docs-t02",
+      "skill": "markdown-docs",
+      "category": "indirect",
+      "query": "请按本仓库 Markdown 约定说明：CHANGELOG 把未发布改动写进历史版本了，正确划分规则和版本标签不一致时的处理是什么。",
+      "should_trigger": true
+    },
+    {
+      "id": "docs-t03",
+      "skill": "markdown-docs",
+      "category": "embedded",
+      "query": "请按本仓库 Markdown 约定说明：发布前更新安装说明、SECURITY 和 issue 模板时各要注意什么，以及怎么检查 GitHub 渲染。",
+      "should_trigger": true
+    },
+    {
+      "id": "docs-t04",
+      "skill": "markdown-docs",
+      "category": "direct",
+      "query": "请按本仓库 Markdown 约定说明：给仓库 README 添加目录、Mermaid 图和 badge 时要注意哪些渲染和锚点问题。",
+      "should_trigger": true
+    },
+    {
+      "id": "docs-t05",
+      "skill": "markdown-docs",
+      "category": "indirect",
+      "query": "这份贡献指南的链接失效，二级标题分隔也不符合项目约定。",
+      "should_trigger": true
+    },
+    {
+      "id": "docs-t06",
+      "skill": "markdown-docs",
+      "category": "boundary",
+      "query": "给 Python 函数增加 docstring 和行内注释。",
+      "should_trigger": false
+    },
+    {
+      "id": "docs-t07",
+      "skill": "markdown-docs",
+      "category": "boundary",
+      "query": "翻译一封临时邮件，不属于仓库文件。",
+      "should_trigger": false
+    },
+    {
+      "id": "docs-t08",
+      "skill": "markdown-docs",
+      "category": "boundary",
+      "query": "实现 Markdown parser 的 AST 节点。",
+      "should_trigger": false
+    },
+    {
+      "id": "docs-t09",
+      "skill": "markdown-docs",
+      "category": "boundary",
+      "query": "只修改网页里的帮助文本，文件是 React 组件。",
+      "should_trigger": false
+    },
+    {
+      "id": "docs-t10",
+      "skill": "markdown-docs",
+      "category": "boundary",
+      "query": "审查 JSON 配置格式，描述中偶然提到 README。",
+      "should_trigger": false
+    },
+    {
+      "id": "layout-t01",
+      "skill": "project-layout",
+      "category": "direct",
+      "query": "请说明按本仓库固定约定，前端、后端、部署、训练和测试目录分别应该怎么组织。",
+      "should_trigger": true
+    },
+    {
+      "id": "layout-t02",
+      "skill": "project-layout",
+      "category": "indirect",
+      "query": "项目已经采用 deploy-config，但 Nginx、Compose 和源码都散在根目录。",
+      "should_trigger": true
+    },
+    {
+      "id": "layout-t03",
+      "skill": "project-layout",
+      "category": "embedded",
+      "query": "请按本仓库固定目录约定说明迁移目录时要同步更新哪些引用，例如 imports、CI paths、Docker COPY 和文档链接。",
+      "should_trigger": true
+    },
+    {
+      "id": "layout-t04",
+      "skill": "project-layout",
+      "category": "direct",
+      "query": "请说明为什么 FastAPI 服务入口放 deploy、模型推理核心放 src，以及如何避免复制实现。",
+      "should_trigger": true
+    },
+    {
+      "id": "layout-t05",
+      "skill": "project-layout",
+      "category": "indirect",
+      "query": "联调样例里混有真实邮箱和 token；请说明按固定 examples 规则该怎么整理和脱敏。",
+      "should_trigger": true
+    },
+    {
+      "id": "layout-t06",
+      "skill": "project-layout",
+      "category": "boundary",
+      "query": "保持 Django 官方目录，不新增 deploy 或 src。",
+      "should_trigger": false
+    },
+    {
+      "id": "layout-t07",
+      "skill": "project-layout",
+      "category": "boundary",
+      "query": "讨论 monorepo 理论，不修改当前仓库结构。",
+      "should_trigger": false
+    },
+    {
+      "id": "layout-t08",
+      "skill": "project-layout",
+      "category": "boundary",
+      "query": "只把一个 Python 文件中的函数重新排序。",
+      "should_trigger": false
+    },
+    {
+      "id": "layout-t09",
+      "skill": "project-layout",
+      "category": "boundary",
+      "query": "为 Next.js 新项目保留框架原生目录。",
+      "should_trigger": false
+    },
+    {
+      "id": "layout-t10",
+      "skill": "project-layout",
+      "category": "boundary",
+      "query": "README 中画一棵目录树，不移动任何文件。",
+      "should_trigger": false
+    },
+    {
+      "id": "hygiene-t01",
+      "skill": "repo-hygiene",
+      "category": "direct",
+      "query": "请按本仓库 dotfiles 约定说明 .gitignore、.editorconfig、.gitattributes 各负责什么，以及什么时候该从 assets 模板复制。",
+      "should_trigger": true
+    },
+    {
+      "id": "hygiene-t02",
+      "skill": "repo-hygiene",
+      "category": "indirect",
+      "query": "请按本仓库依赖同步约定说明：uv.lock 更新了但 requirements.txt 导出结果没同步，该怎么修。",
+      "should_trigger": true
+    },
+    {
+      "id": "hygiene-t03",
+      "skill": "repo-hygiene",
+      "category": "embedded",
+      "query": "请按本仓库 dotfiles 约定说明初始化仓库时要补哪些跨平台换行规则、环境文件忽略和 Docker build context 忽略。",
+      "should_trigger": true
+    },
+    {
+      "id": "hygiene-t04",
+      "skill": "repo-hygiene",
+      "category": "direct",
+      "query": "请按本仓库 repo-hygiene 约定说明：保留空运行目录时为什么不要用 .gitkeep，内部 .gitignore 该怎么写。",
+      "should_trigger": true
+    },
+    {
+      "id": "hygiene-t05",
+      "skill": "repo-hygiene",
+      "category": "indirect",
+      "query": "请按本仓库 dotfiles 约定说明：团队提交部分 VS Code 配置、其余本地状态仍需精确忽略时该怎么做。",
+      "should_trigger": true
+    },
+    {
+      "id": "hygiene-t06",
+      "skill": "repo-hygiene",
+      "category": "boundary",
+      "query": "实现新的支付 API。",
+      "should_trigger": false
+    },
+    {
+      "id": "hygiene-t07",
+      "skill": "repo-hygiene",
+      "category": "boundary",
+      "query": "修复 .env 读取代码的业务逻辑，不改 ignore 文件。",
+      "should_trigger": false
+    },
+    {
+      "id": "hygiene-t08",
+      "skill": "repo-hygiene",
+      "category": "boundary",
+      "query": "解释 Git 的内部对象存储。",
+      "should_trigger": false
+    },
+    {
+      "id": "hygiene-t09",
+      "skill": "repo-hygiene",
+      "category": "boundary",
+      "query": "只更新 README 里的 requirements 安装命令。",
+      "should_trigger": false
+    },
+    {
+      "id": "hygiene-t10",
+      "skill": "repo-hygiene",
+      "category": "boundary",
+      "query": "选择 Python Web 框架，不整理仓库配置。",
+      "should_trigger": false
+    },
+    {
+      "id": "ps-t01",
+      "skill": "powershell-quality",
+      "category": "direct",
+      "query": "请按本仓库 PowerShell 约定 review 这个 .ps1：它用了 Get-WmiObject、Out-Null，并且循环里调用 Format-Table。",
+      "should_trigger": true
+    },
+    {
+      "id": "ps-t02",
+      "skill": "powershell-quality",
+      "category": "indirect",
+      "query": "脚本打开文件句柄后没释放，还混用了 cmd 命令；请按本仓库 PowerShell 约定说明怎么改。",
+      "should_trigger": true
+    },
+    {
+      "id": "ps-t03",
+      "skill": "powershell-quality",
+      "category": "embedded",
+      "query": "部署脚本要写临时文件、调用外部命令并处理失败；请按本仓库 PowerShell 约定说明结构、错误处理和清理怎么做。",
+      "should_trigger": true
+    },
+    {
+      "id": "ps-t04",
+      "skill": "powershell-quality",
+      "category": "direct",
+      "query": "请按本仓库 PowerShell 约定写一个带 CmdletBinding、-WhatIf 和 splatting 的 .ps1。",
+      "should_trigger": true
+    },
+    {
+      "id": "ps-t05",
+      "skill": "powershell-quality",
+      "category": "indirect",
+      "query": "这个脚本大量用 [System.*] 和 COM 调系统；请按本仓库约定说明该优先用什么替代。",
+      "should_trigger": true
+    },
+    {
+      "id": "ps-t06",
+      "skill": "powershell-quality",
+      "category": "boundary",
+      "query": "写一个 cmd.exe 批处理脚本清理临时文件。",
+      "should_trigger": false
+    },
+    {
+      "id": "ps-t07",
+      "skill": "powershell-quality",
+      "category": "boundary",
+      "query": "用 Python 解析 JSON 并打印结果。",
+      "should_trigger": false
+    },
+    {
+      "id": "ps-t08",
+      "skill": "powershell-quality",
+      "category": "boundary",
+      "query": "README 里解释了 PowerShell 命令，只修改这段文案。",
+      "should_trigger": false
+    },
+    {
+      "id": "ps-t09",
+      "skill": "powershell-quality",
+      "category": "boundary",
+      "query": "修复一个 C# 单元测试。",
+      "should_trigger": false
+    },
+    {
+      "id": "ps-t10",
+      "skill": "powershell-quality",
+      "category": "boundary",
+      "query": "选择 JavaScript 构建工具，不写脚本。",
+      "should_trigger": false
+    }
+  ]
+}

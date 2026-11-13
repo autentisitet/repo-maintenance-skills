@@ -1,32 +1,42 @@
 #!/usr/bin/env bash
-# 把本仓库的 skills 安装到 Codex 的 skills 目录。
+# Install this repository's skills into the Codex skills directory.
 #
-# 用法:
-#   ./scripts/install.sh            # 软链（推荐，改完直接生效）
-#   ./scripts/install.sh --copy         # 复制而不是软链接
-#   ./scripts/install.sh --copy --force # 替换已有副本
+# Usage:
+#   ./scripts/links/install.sh               # symlink (recommended)
+#   ./scripts/links/install.sh --copy        # copy instead of linking
+#   ./scripts/links/install.sh --copy --force
 set -euo pipefail
 
-repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 dest="${CODEX_HOME:-$HOME/.codex}/skills"
 mode="link"
 force=false
 marker_name=".repo-maintenance-skills-install"
 
+usage() {
+  printf '%s\n' \
+    "Usage: $0 [--copy] [--force]" \
+    "Default: symlink. --copy creates a managed copy; --force replaces only managed installs."
+}
+
 for arg in "$@"; do
   case "$arg" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
     --copy) mode="copy" ;;
     --force) force=true ;;
     *)
-      echo "未知参数: $arg" >&2
-      echo "用法: $0 [--copy] [--force]" >&2
+      echo "Unknown argument: $arg" >&2
+      usage >&2
       exit 2
       ;;
   esac
 done
 
 mkdir -p "$dest"
-echo "安装目标: $dest"
+echo "Install destination: $dest"
 
 for dir in "$repo"/skills/*/; do
   name="$(basename "$dir")"
@@ -41,13 +51,13 @@ for dir in "$repo"/skills/*/; do
       managed=true
     fi
     if [[ "$managed" != true ]]; then
-      echo "拒绝替换非本项目管理的 skill: $target" >&2
-      echo "请先手动备份或移走该目录。" >&2
+      echo "Refusing to replace an unmanaged skill: $target" >&2
+      echo "Back up or move that directory explicitly before retrying." >&2
       exit 1
     fi
     rm -rf -- "$target"
   elif [[ -e "$target" || -L "$target" ]]; then
-    echo "skip  $name（已存在：$target）"
+    echo "skip  $name (already exists: $target)"
     continue
   fi
 
@@ -61,4 +71,4 @@ for dir in "$repo"/skills/*/; do
   fi
 done
 
-echo "完成。在 Codex 中用 \$<skill-name> 调用。"
+echo "Done. Invoke a skill in Codex with \$<skill-name>."

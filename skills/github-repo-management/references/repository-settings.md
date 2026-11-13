@@ -1,22 +1,19 @@
-# 仓库设置与展示信息
+# Repository Settings and Presentation
 
-- 如果任务涉及 visibility 变更，至少说明与当前仓库相关的潜在影响，例如 stars/watchers、
-  fork 网络、rulesets 或 Actions 历史访问变化；不要暗示所有影响一定发生。
-- 如果仓库已经重命名，建议至少检查本地 remote、README/badge 和外部集成，只更新实际受影响的链接。
+- For visibility changes, describe repository-specific effects that may apply, such as forks, stars/watchers, rulesets, or Actions-history access. Do not claim every possible effect is certain.
+- After a rename, inspect local remotes, README badges, links, and external integrations; update only affected references.
 
-## About、topics、homepage
+## About, Topics, and Homepage
 
-根据 README、主要配置和语言构成给出推荐，不只根据仓库名猜测。默认推荐英语内容：
+Derive recommendations from README content, primary configuration, and languages instead of guessing from the repository name.
 
-- About 用一句话说明项目是什么、面向谁或解决什么问题。优先使用可检索的正式名称，避免
-  `awesome`、`best`、`production-ready` 等无法验证的宣传词。
-- topics 只选仓库实际覆盖的技术、平台、用途和文件格式。使用小写、短横线分隔的词；不要为了
-  增加曝光添加宽泛但不准确的 `ai`、`tools` 或无关生态标签。
-- 推荐结果建议至少包含一条首选 About、一组按相关性排序的 topics，以及与仓库内容的对应依据。
-- 仓库内容不足以支持可靠推荐时，指出缺少的信息。
+- Write a one-sentence About description that says what the project is, who it serves, or what it solves. Avoid unverifiable marketing such as `best` or `production-ready`.
+- Use lowercase hyphenated topics for technologies, platforms, purposes, and formats the repository actually covers. Do not add broad inaccurate labels for visibility.
+- Provide one preferred About line, a relevance-ordered topic set, and the repository evidence behind them.
+- State what information is missing when reliable recommendations are not possible.
 
 ---
 
-## LICENSE
+## License
 
-已有 `LICENSE` 时不覆盖。更换许可证前确认当前许可证、版权归属和再许可条件。
+Do not overwrite an existing `LICENSE`. Before changing it, verify the current license, copyright ownership, contributor agreements, and relicensing rights.

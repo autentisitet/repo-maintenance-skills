@@ -1,0 +1,29 @@
+# Normalize text to LF by default; override only where required.
+* text=auto eol=lf
+
+# Mark binary formats explicitly to avoid text diffs.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.onnx binary
+*.pt binary
+*.safetensors binary
+
+# Exclude generated or vendored files from language statistics.
+docs/** linguist-documentation
+uv.lock linguist-generated
+requirements.txt linguist-generated
+
+# cmd.exe scripts use CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf

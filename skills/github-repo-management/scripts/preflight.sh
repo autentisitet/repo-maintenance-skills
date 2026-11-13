@@ -4,8 +4,20 @@ set -euo pipefail
 
 repo="${1:-.}"
 
+if [[ "$repo" == "-h" || "$repo" == "--help" ]]; then
+  echo "Usage: $0 [repository]"
+  echo "Read-only checks for Git state, remotes, LFS, environment files, and GitHub CLI authentication."
+  exit 0
+fi
+
 say() {
   printf '\n== %s ==\n' "$1"
+}
+
+redact_remote() {
+  sed -E \
+    -e 's#(https?://)[^/@[:space:]]+:[^/@[:space:]]+@#\1[redacted]@#g' \
+    -e 's#(https?://)[^/@[:space:]]+@#\1[redacted]@#g'
 }
 
 if ! command -v git >/dev/null 2>&1; then
@@ -29,7 +41,7 @@ if git -C "$repo" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   git -C "$repo" status --short
 
   say "remotes"
-  git -C "$repo" remote -v
+  git -C "$repo" remote -v | redact_remote
 
   say "recent tags"
   git -C "$repo" tag --list | tail -10

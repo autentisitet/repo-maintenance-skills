@@ -3,8 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
-    # 本仓库的校验对象是 Markdown 结构与链接，因此不能忽略 *.md；
-    # 只忽略不参与校验的文件。
+    # Markdown structure and links are validation inputs, so do not ignore *.md.
     paths-ignore:
       - "LICENSE"
       - "**/*.png"
@@ -33,21 +32,18 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+      - name: Check dependency lock and export
+        run: |
+          uv lock --check
+          uv export --frozen --no-header --format requirements-txt -o "$RUNNER_TEMP/requirements.txt"
+          tail -n +3 requirements.txt > "$RUNNER_TEMP/requirements-committed.txt"
+          diff -u "$RUNNER_TEMP/requirements-committed.txt" "$RUNNER_TEMP/requirements.txt"
       - name: Install validator dependencies
-        run: python3 -m pip install -r requirements.txt
+        run: python3 -m pip install --require-hashes -r requirements.txt
       - name: Validate skills
-        run: |
-          python3 scripts/validate_skills.py
-          python3 scripts/test_validate_skills.py
-          python3 scripts/test_skill_examples.py
-          python3 skills/markdown-docs/scripts/section-dividers.py --check .
-      - name: Check shell scripts parse
-        run: |
-          shopt -s nullglob
-          files=(scripts/*.sh skills/*/scripts/*.sh)
-          for f in "${files[@]}"; do
-            bash -n "$f" && echo "ok  $f"
-          done
+        run: make validate
       - name: Smoke-test CSS audit
         run: |
           test_dir="$(mktemp -d)"
@@ -57,23 +53,23 @@ jobs:
       - name: Smoke-test installer
         run: |
           test_home="$(mktemp -d)"
-          CODEX_HOME="$test_home/link" ./scripts/install.sh
+          CODEX_HOME="$test_home/link" ./scripts/links/install.sh
           test -L "$test_home/link/skills/markdown-docs"
 
-          CODEX_HOME="$test_home/copy" ./scripts/install.sh --copy
+          CODEX_HOME="$test_home/copy" ./scripts/links/install.sh --copy
           test -f "$test_home/copy/skills/markdown-docs/SKILL.md"
 
-          CODEX_HOME="$test_home/copy" ./scripts/install.sh --copy --force
+          CODEX_HOME="$test_home/copy" ./scripts/links/install.sh --copy --force
           test -f "$test_home/copy/skills/markdown-docs/SKILL.md"
 
           mkdir -p "$test_home/unmanaged/skills/markdown-docs"
           touch "$test_home/unmanaged/skills/markdown-docs/keep-me"
-          if CODEX_HOME="$test_home/unmanaged" ./scripts/install.sh --force \
+          if CODEX_HOME="$test_home/unmanaged" ./scripts/links/install.sh --force \
             >"$test_home/unmanaged.log" 2>&1; then
             echo "installer replaced an unmanaged skill" >&2
             exit 1
           fi
-          grep -F "拒绝替换非本项目管理的 skill" "$test_home/unmanaged.log"
+          grep -F "Refusing to replace an unmanaged skill" "$test_home/unmanaged.log"
           test -f "$test_home/unmanaged/skills/markdown-docs/keep-me"
 
 
@@ -86,22 +82,45 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+      - name: Parse PowerShell skill examples
+        run: |
+          $text = Get-Content -LiteralPath .\skills\powershell-quality\SKILL.md -Raw
+          $blocks = [regex]::Matches($text, '(?ms)^```powershell\s*\r?\n(.*?)^```\s*$')
+          if ($blocks.Count -eq 0) {
+            throw "No PowerShell examples found"
+          }
+          foreach ($block in $blocks) {
+            $tokens = $null
+            $parseErrors = $null
+            $null = [System.Management.Automation.Language.Parser]::ParseInput(
+              $block.Groups[1].Value, [ref]$tokens, [ref]$parseErrors
+            )
+            if ($parseErrors.Count -gt 0) {
+              throw "Invalid PowerShell example: $($parseErrors[0].Message)"
+            }
+          }
       - name: Smoke-test PowerShell installer
         run: |
+          $env:CODEX_HOME = Join-Path $env:RUNNER_TEMP "codex-whatif"
+          .\scripts\links\install.ps1 -WhatIf
+          if (Test-Path "$env:CODEX_HOME\skills\markdown-docs") {
+            throw "WhatIf created an installation target"
+          }
+
           $env:CODEX_HOME = Join-Path $env:RUNNER_TEMP "codex-junction"
-          .\scripts\install.ps1
+          .\scripts\links\install.ps1
           $link = Get-Item "$env:CODEX_HOME\skills\markdown-docs"
           if ($link.LinkType -ne "Junction") {
             throw "junction install failed"
           }
 
           $env:CODEX_HOME = Join-Path $env:RUNNER_TEMP "codex-copy"
-          .\scripts\install.ps1 -Copy
+          .\scripts\links\install.ps1 -Copy
           if (-not (Test-Path "$env:CODEX_HOME\skills\markdown-docs\SKILL.md")) {
             throw "initial copy install failed"
           }
 
-          .\scripts\install.ps1 -Copy -Force
+          .\scripts\links\install.ps1 -Copy -Force
           if (-not (Test-Path "$env:CODEX_HOME\skills\markdown-docs\SKILL.md")) {
             throw "forced copy install failed"
           }
@@ -112,10 +131,10 @@ jobs:
           New-Item -ItemType File -Path (Join-Path $unmanaged "keep-me") | Out-Null
           $refused = $false
           try {
-            .\scripts\install.ps1 -Force
+            .\scripts\links\install.ps1 -Force
           }
           catch {
-            if ($_.Exception.Message -match "拒绝替换非本项目管理的 skill") {
+            if ($_.Exception.Message -match "Refusing to replace an unmanaged skill") {
               $refused = $true
             }
             else {

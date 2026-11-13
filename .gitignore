@@ -1,6 +1,37 @@
+# OS
 .DS_Store
 Thumbs.db
-*.log
+desktop.ini
+
+# IDE and agent directories may contain shared configuration. Enable only for confirmed local state.
+# .idea/
+# .vscode/
+# .claude/
+# .codex/
+# .agents/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Local cloud credentials
+/.aws/
+
+# Build output
+dist/
+build/
 out/
+*.log
+
+# Python
+.venv/
 __pycache__/
 *.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Generated local evaluation results
+evals/results/

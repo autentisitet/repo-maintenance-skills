@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 import subprocess
 import tempfile
@@ -13,6 +14,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def load_section_dividers():
+    """Load the Markdown divider script as a Python module.
+
+    中文：按文件路径动态导入 section-dividers.py，供行为测试直接调用。
+    """
     path = ROOT / "skills" / "markdown-docs" / "scripts" / "section-dividers.py"
     spec = importlib.util.spec_from_file_location("section_dividers", path)
     if spec is None or spec.loader is None:
@@ -23,6 +28,10 @@ def load_section_dividers():
 
 
 def makefile_example() -> str:
+    """Extract the first Makefile example from the container reference.
+
+    中文：读取 compose reference 中的 Makefile 围栏内容，供真实 make 行为测试使用。
+    """
     path = ROOT / "skills" / "container-quality" / "references" / "compose.md"
     lines = path.read_text(encoding="utf-8").splitlines()
     inside = False
@@ -104,6 +113,72 @@ class ContainerExampleTests(unittest.TestCase):
                 text=True,
             )
             self.assertIn("docker-compose.podman-cpu.yaml", default.stdout)
+
+
+class RepositoryPreflightTests(unittest.TestCase):
+    def test_remote_credentials_are_redacted(self) -> None:
+        script = ROOT / "skills" / "github-repo-management" / "scripts" / "preflight.sh"
+        with tempfile.TemporaryDirectory() as directory:
+            subprocess.run(["git", "init", "-q", directory], check=True)
+            subprocess.run(
+                ["git", "-C", directory, "remote", "add", "origin", "https://user:secret@example.com/acme/repo.git"],
+                check=True,
+            )
+            result = subprocess.run(
+                [str(script), directory],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            self.assertNotIn("user:secret", result.stdout)
+            self.assertIn("https://[redacted]@example.com/acme/repo.git", result.stdout)
+
+
+class BilingualDocstringTests(unittest.TestCase):
+    def test_production_and_helper_functions_have_bilingual_docstrings(self) -> None:
+        paths = (
+            sorted((ROOT / "scripts").rglob("*.py"))
+            + sorted((ROOT / "skills").glob("*/scripts/*.py"))
+            + sorted((ROOT / "tests").glob("*.py"))
+        )
+        missing: list[str] = []
+        for path in paths:
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    continue
+                if path.parent.name == "tests" and node.name.startswith("test_"):
+                    continue
+                docstring = ast.get_docstring(node, clean=False)
+                if docstring is None or "中文：" not in docstring:
+                    missing.append(f"{path.relative_to(ROOT)}:{node.lineno}:{node.name}")
+        self.assertEqual(missing, [])
+
+    def test_design_consideration_sections_are_bilingual_pairs(self) -> None:
+        paths = (
+            sorted((ROOT / "scripts").rglob("*.py"))
+            + sorted((ROOT / "skills").glob("*/scripts/*.py"))
+            + sorted((ROOT / "tests").glob("*.py"))
+        )
+        unpaired: list[str] = []
+        for path in paths:
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    continue
+                docstring = ast.get_docstring(node, clean=False) or ""
+                has_english = "Design/System considerations:" in docstring
+                has_chinese = "设计/系统考虑：" in docstring
+                chinese_start = docstring.find("中文：")
+                english_design = docstring.find("Design/System considerations:")
+                chinese_design = docstring.find("设计/系统考虑：")
+                if (
+                    has_english != has_chinese
+                    or (has_english and not (english_design < chinese_start < chinese_design))
+                    or (chinese_start >= 0 and any("\u4e00" <= char <= "\u9fff" for char in docstring[:chinese_start]))
+                ):
+                    unpaired.append(f"{path.relative_to(ROOT)}:{node.lineno}:{node.name}")
+        self.assertEqual(unpaired, [])
 
 
 if __name__ == "__main__":
