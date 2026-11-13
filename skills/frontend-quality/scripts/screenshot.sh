@@ -1,16 +1,23 @@
 #!/usr/bin/env bash
-# 用 headless Chrome 截取页面，用于确认实际渲染效果。
+# Capture a page with headless Chrome for render verification.
 #
-# 用法: ./screenshot.sh <url> [WxH] [out.png]
+# Usage: ./screenshot.sh <url> [WxH] [out.png]
 #   ./screenshot.sh http://localhost:8000 1440x900 out/desktop.png
 #
-# 找不到浏览器时，用 CHROME_PATH 指定可执行文件。
+# Set CHROME_PATH when Chrome/Chromium cannot be discovered.
 set -euo pipefail
 
 usage() {
-  echo "用法: $0 <url> [WxH] [out.png]" >&2
+  echo "Usage: $0 <url> [WxH] [out.png]" >&2
   exit 2
 }
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  printf '%s\n' \
+    "Usage: $0 <url> [WxH] [out.png]" \
+    "Set CHROME_PATH for Chrome/Chromium; default size is 1440x900."
+  exit 0
+fi
 
 [[ $# -ge 1 ]] || usage
 url="$1"
@@ -41,14 +48,14 @@ if [[ -z "$chrome" ]]; then
   done
 fi
 if [[ -z "$chrome" ]]; then
-  echo "找不到 Chrome/Chromium。设置 CHROME_PATH 指向可执行文件。" >&2
+  echo "Chrome/Chromium not found. Set CHROME_PATH to an executable." >&2
   exit 1
 fi
 
 if command -v "$chrome" >/dev/null 2>&1; then
   chrome="$(command -v "$chrome")"
 elif [[ ! -x "$chrome" ]]; then
-  echo "CHROME_PATH 不可执行: $chrome" >&2
+  echo "CHROME_PATH is not executable: $chrome" >&2
   exit 1
 fi
 
@@ -73,14 +80,14 @@ if ! "$chrome" \
   --window-size="$box" \
   --screenshot="$out" \
   "$url" >/dev/null 2>"$err_log"; then
-  echo "浏览器执行失败（$chrome）：" >&2
+  echo "Browser execution failed ($chrome):" >&2
   tail -20 "$err_log" >&2
   exit 1
 fi
 
 if [[ ! -s "$out" ]]; then
-  echo "截图失败，未生成 $out" >&2
+  echo "Screenshot failed; no output was created at $out" >&2
   exit 1
 fi
 
-echo "已保存: $out ($box)"
+echo "Saved: $out ($box)"

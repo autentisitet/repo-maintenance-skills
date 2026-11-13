@@ -1,6 +1,15 @@
-# Workflow 配置
+# Workflow Configuration
 
-## 最小骨架
+## Contents
+
+- Minimal workflow and Action references
+- Path filters, permissions, and secrets
+- Matrices, caching, Dependabot, and CodeQL
+- Common failures
+
+---
+
+## Minimal Workflow
 
 ```yaml
 name: CI
@@ -32,67 +41,46 @@ jobs:
 
 ---
 
-## Action 引用策略
+## Action References
 
-不要把 SHA pinning 当成所有 workflow 的固定格式。先看 Action 来源、job 权限和被篡改后的后果：
+Choose references from source, permissions, secrets, and compromise impact:
 
-| 场景 | 建议引用方式 |
+| Situation | Reference policy |
 | --- | --- |
-| GitHub 官方 Action；只读权限；不接触 secrets；只跑测试或静态检查 | major tag，例如 `actions/checkout@v7` |
-| 第三方 Action，但 job 无 secrets 和写权限，输出也不作为可信发布物 | major tag 或完整 SHA，按仓库维护成本选择 |
-| Action 接触 secrets、`contents: write`、`id-token: write`、发布、签名或部署 | 优先使用完整 commit SHA，并在旁边注明对应版本；若保留官方 Action 的 major tag，明确这是对发布方的信任选择 |
+| Official Action, read-only job, no secrets | Major tag can be acceptable |
+| Third-party Action without secrets or write permissions | Major tag or full SHA based on repository risk |
+| Secrets, write/OIDC permissions, publishing, signing, deployment | Prefer a full commit SHA and document the release version |
 
-major tag 可能被维护者更新指向，完整 SHA 则牺牲更新便利换取不可变引用。选择应与实际权限和供应链风险匹配，不要让低风险校验仓库承担无收益的维护成本。
-
----
-
-## paths-ignore
-
-只在任务确实与这些文件无关时才忽略。忽略 `**/*.md` 之前先确认没有 markdown 校验步骤——否则校验永远不会触发，看起来一直绿。
-
-```yaml
-on:
-  push:
-    paths-ignore:
-      - "docs/**"
-      - "LICENSE"
-```
-
-注意 `paths-ignore` 与 `paths` 不能同时出现在同一个触发事件下。
+Full SHAs trade update convenience for immutability. Do not impose that maintenance cost where it does not reduce meaningful risk.
 
 ---
 
-## 权限
+## Paths and Permissions
 
-- 顶层写 `permissions: { contents: read }`，按 job 提升。
-- `pull_request_target` 以目标分支权限运行，且能读取 secrets；fork 的 PR 代码若在其中被执行，等于把仓库交出去。除非明确需要，改用 `pull_request`。
-- 发布类 job 需要 `contents: write` 时，只给那一个 job，不要整体提升。
-- `id-token: write` 只在用 OIDC 换取云厂商凭证时开启。
-
----
-
-## 密钥
-
-详见 [log-hygiene.md](log-hygiene.md)。避免输出 secret；原值通常能被日志遮蔽，但编码、截断、拼接等派生值需要在输出前用 `::add-mask::` 单独登记。
+- Use `paths-ignore` only for inputs unrelated to the workflow. Never ignore Markdown if the workflow validates Markdown.
+- Do not combine `paths` and `paths-ignore` under the same event.
+- Set minimal top-level permissions and elevate only the job that needs write or OIDC access.
+- Never execute fork code under `pull_request_target` with elevated permissions or secrets.
 
 ---
 
-## 矩阵
+## Secrets and Logs
 
-- `fail-fast: false` 只在需要一次看完全部失败项时开，否则会拖长反馈时间。
-- 矩阵里每个组合都要有明确目的；把版本号全列一遍通常只是在浪费额度。
-- `include` / `exclude` 写在矩阵内，不要用脚本拼 `matrix`。
+See [log-hygiene.md](log-hygiene.md). Treat derived secret values as unmasked until explicitly registered with `::add-mask::`.
 
 ---
 
-## 缓存
+## Matrices and Caching
 
-- 依赖缓存的 key 通常应包含锁文件哈希，例如 `${{ hashFiles('**/uv.lock') }}`，并包含影响缓存兼容性的运行时和平台信息。
-- 构建结果只有在输入和工具链都能可靠纳入 key 时才适合缓存；无法定义失效条件时优先缓存下载产物。
+- Use `fail-fast: false` only when seeing every failure is worth the additional runtime.
+- Give every matrix dimension a concrete compatibility purpose; listing every version usually only wastes quota.
+- Put `include` and `exclude` in the matrix rather than generating matrix JSON in a shell script.
+- Include lockfile hashes and the runtime and platform that affect cache compatibility in dependency-cache keys.
+- Cache build output only when every invalidation input can be represented reliably; otherwise cache download artifacts first.
 
 ---
 
-## 依赖与安全扫描
+## Dependency and Security Scanning
 
 ### Dependabot
 
@@ -108,23 +96,23 @@ updates:
         patterns: ["*"]
 ```
 
-- 为仓库实际使用、且希望自动更新的生态配置 Dependabot；本 skill 涉及的仓库通常应包含 `github-actions`。
-- 用 `groups` 合并 patch 更新，否则每个小版本都会单独开 PR。
-- 使用 major tag 时让 Dependabot 提醒跨 major 升级；使用完整 SHA 时，审查更新是否对应可信 release，不要只看自动生成的版本注释。
+- Configure Dependabot only for ecosystems the repository actually uses and wants automated updates for. Repositories this skill covers usually include `github-actions`.
+- Use `groups` to merge patch updates; otherwise every minor version opens a separate pull request.
+- With major tags, let Dependabot flag cross-major upgrades. With full SHAs, verify that each update corresponds to a trusted release instead of trusting the generated version notes.
 
 ### CodeQL
 
-- 公开仓库优先用 Settings → Code security 里的 default setup，不要手写 workflow。
-- 私有仓库是否能使用 CodeQL 取决于当前 GitHub 方案和安全功能配置；先检查仓库设置，再决定使用 default setup 或 workflow。
-- 手写时 `permissions` 至少需要 `security-events: write`。
+- Prefer the default setup under Settings → Code security for public repositories instead of hand-writing a workflow.
+- Whether a private repository can use CodeQL depends on the current GitHub plan and security-feature configuration; check the repository settings before choosing default setup or a workflow.
+- A hand-written workflow generally needs at least `security-events: write`.
 
 ---
 
-## 常见失败
+## Common Failures
 
-| 现象 | 原因 |
+| Symptom | Likely cause |
 | --- | --- |
-| Windows job 脚本报语法错 | 默认 shell 是 pwsh，没设 `shell: bash` |
-| 缓存一直不更新 | key 里没有锁文件哈希 |
-| PR 的 secrets 为空 | fork PR 拿不到 secrets，这是预期行为 |
-| badge 显示 no status | 引用的 workflow 文件名或分支不存在 |
+| Windows step parses Bash as PowerShell | Missing `shell: bash` |
+| Cache never invalidates | Lockfile hash absent from the key |
+| Fork PR has empty secrets | Expected GitHub security behavior |
+| Badge reports no status | Wrong workflow filename or branch |

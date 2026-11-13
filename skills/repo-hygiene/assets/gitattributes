@@ -1,7 +1,7 @@
-# 默认把文本规范化为 LF；按项目需要覆盖特殊文件
+# Normalize text to LF by default; override only where required.
 * text=auto eol=lf
 
-# 明确二进制，避免被当成文本做 diff
+# Mark binary formats explicitly to avoid text diffs.
 *.png binary
 *.jpg binary
 *.jpeg binary
@@ -19,11 +19,11 @@
 *.pt binary
 *.safetensors binary
 
-# 不要在语言统计里刷屏
+# Exclude generated or vendored files from language statistics.
 docs/** linguist-documentation
 uv.lock linguist-generated
 requirements.txt linguist-generated
 
-# cmd.exe 脚本使用 CRLF
+# cmd.exe scripts use CRLF.
 *.bat text eol=crlf
 *.cmd text eol=crlf

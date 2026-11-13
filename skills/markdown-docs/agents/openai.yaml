@@ -1,4 +1,4 @@
 interface:
-  display_name: "Markdown 文档"
-  short_description: "编写和审查仓库 README、CHANGELOG 与社区文档"
+  display_name: "Markdown Documentation"
+  short_description: "Write and review repository Markdown and community documents"
   default_prompt: "Use $markdown-docs to write or revise this repository's Markdown documentation."

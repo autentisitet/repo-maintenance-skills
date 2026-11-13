@@ -1,0 +1,4 @@
+interface:
+  display_name: "PowerShell Quality"
+  short_description: "Review PowerShell scripts for cmdlets, cleanup, and errors"
+  default_prompt: "Use $powershell-quality to write or review this PowerShell script and verify its cmdlet choices, resource cleanup, pipeline, and error handling."

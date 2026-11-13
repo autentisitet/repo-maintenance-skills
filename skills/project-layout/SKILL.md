@@ -1,36 +1,33 @@
 ---
 name: project-layout
-description: 仅当用户明确要求采用本仓库固定目录约定，或现有项目已经使用该布局时，用于组织前端、后端、部署配置、测试、脚本、联调示例、文档以及机器学习代码和训练配置。不用于保留框架原生布局或采用其他架构规范的项目。
+description: Use only when the user explicitly requests this repository's fixed directory convention or the existing project already follows it. Organize frontend, backend, deployment configuration, tests, scripts, integration examples, documentation, and machine-learning code. Do not use when preserving a framework-native layout or another architecture.
 metadata:
-  short-description: 组织前后端、部署配置、测试、脚本、示例、文档和训练代码目录
+  short-description: Organize application, deployment, tests, docs, and ML directories
 ---
 
-# 项目目录组织
+# Project Layout
 
-## 顶层职责
+## Top-Level Responsibilities
 
-按文件的实际职责放置，不因构建工具默认路径或历史位置继续混放：
-
-| 目录 | 内容 |
+| Directory | Responsibility |
 | --- | --- |
-| `frontend/` | 前端源码、前端资源、前端构建配置和仅供前端使用的类型定义 |
-| `deploy/` | 后端 API、服务进程、任务进程及其他后端运行时代码 |
-| `deploy-config/` | Nginx、Docker、Podman、进程管理和其他后端部署框架的配置 |
-| `tests/` | 单元、集成、端到端、迁移和安全测试代码 |
-| `scripts/` | 自动化构建环境、下载或准备数据集、获取模型权重及其他可重复执行的项目脚本 |
-| `examples/` | 前后端联调的本地测试例子和样例输入；默认不提交具体例子 |
-| `docs/` | 项目架构流程图、设计说明和后端生成文档，例如 OpenAPI schema |
-| `src/` | 深度学习、机器学习、数据处理、训练、评估和推理核心代码 |
-| `train-config/` | 深度学习或机器学习的训练、评估和实验配置 |
+| `frontend/` | Frontend source, assets, build configuration, frontend-only types |
+| `deploy/` | Backend APIs, services, workers, and other server runtime code |
+| `deploy-config/` | Nginx, Compose, process management, and deployment configuration |
+| `tests/` | Unit, integration, end-to-end, migration, and security tests |
+| `scripts/` | Repeatable environment, build, dataset, and model preparation tools |
+| `examples/` | Local frontend/backend integration examples and sample inputs; do not commit concrete examples by default |
+| `docs/` | Architecture, design notes, and generated backend documentation |
+| `src/` | ML, data processing, training, evaluation, and inference core code |
+| `train-config/` | Training, evaluation, and experiment configuration |
 
-后端服务调用机器学习能力时，HTTP/API 和服务启动代码放在 `deploy/`，模型、训练和推理核心逻辑放在
-`src/`。不要为迁就两个入口复制同一份实现；通过清晰的模块接口连接它们。
+When a backend calls ML functionality, keep HTTP/service startup code in `deploy/` and model/training/inference logic in `src/`. Connect them through a clear module boundary; do not duplicate implementations.
 
 ---
 
-## 目录内部组织
+## Internal Organization
 
-`deploy-config/` 不得平铺。按技术或职责建立子目录，只创建项目实际使用的部分，例如：
+Do not flatten `deploy-config/`. Create only the subdirectories the project uses, for example:
 
 ```text
 deploy-config/
@@ -40,24 +37,25 @@ deploy-config/
 └── environments/
 ```
 
-Nginx 站点、片段和证书引用放在 `nginx/` 下继续按用途分组。容器项目是根目录文件规则的例外：
-`.dockerignore` 和 `Dockerfile` 固定放在仓库根目录，Compose 文件放在 `deploy-config/compose/`；具体
-Docker/Podman、CPU/GPU、SELinux 和日志规则使用 `$container-quality`。不同环境的非敏感差异可以放在
-`environments/`，密钥和真实凭据不得提交。
+Keep Nginx sites, snippets, and certificate references grouped under `nginx/` by purpose. The container
+project is the exception to the root-file rule: `.dockerignore` and `Dockerfile` stay at repository root,
+Compose files live under `deploy-config/compose/`, and runtime-specific Docker/Podman, CPU/GPU, SELinux,
+and logging rules use `$container-quality`. Non-secret per-environment differences may live under
+`environments/`; never commit keys or real credentials.
 
-`tests/` 按测试层级或被测子系统分组，并与源码边界保持可识别关系。`scripts/` 按用途分组，例如
-`build/`、`data/`、`models/` 和 `dev/`；下载脚本要支持校验来源、校验和及失败重试，不把数据集或
-模型权重直接提交到脚本目录。
+Group tests by level or subsystem while keeping a recognizable relationship with source boundaries. Group
+scripts by purpose such as `build/`, `data/`, `models/`, and `dev/`. Download scripts must verify origin,
+checksums, and failure retries; do not commit datasets or model weights into the scripts directory.
 
-`docs/` 中的内容按类型组织，例如架构图放在 `docs/architecture/`，FastAPI 生成的 OpenAPI 文件放在
-`docs/api/openapi.json`。生成文件由真实应用或对应工具更新，不手工维护另一份重复定义。
+Organize docs by type, for example architecture diagrams under `docs/architecture/` and generated FastAPI
+OpenAPI under `docs/api/openapi.json`. Generated files are updated by the real application or tooling; do
+not maintain a second handwritten copy.
 
 ---
 
-## 联调示例
+## Integration Examples
 
-`examples/` 中必须保留一个 `readme.md`，说明前置条件、启动方式、数据准备、预期结果和清理方式。
-具体联调例子默认加入 `.gitignore`，只提交指导文件：
+Keep `examples/readme.md` with prerequisites, startup, data preparation, expected results, and cleanup. Ignore local examples while preserving that guide:
 
 ```gitignore
 # Local frontend-backend integration examples
@@ -65,31 +63,32 @@ examples/*
 !examples/readme.md
 ```
 
-不要改成 `examples/`，否则后续否定规则无法重新包含 `readme.md`。
+Do not rename it to `examples/`, or the later negation rule cannot re-include `readme.md`.
 
-只有一个简单例子时可以直接放在 `examples/`。存在多个场景、多个后端、多个前端入口或一个例子包含
-多份文件时，按场景建立子目录，例如 `examples/login-flow/`、`examples/upload-flow/`，不要把所有请求、
-响应、脚本和样例数据平铺在根目录。
+A single simple example may live directly under `examples/`. When there are multiple scenarios, multiple
+backends or frontend entrypoints, or one example with several files, use scenario subdirectories such as
+`examples/login-flow/` and `examples/upload-flow/` instead of flattening every request, response, script,
+and sample into the root.
 
-创建、打包或发送联调例子前，清除文件名中的用户名、邮箱、主机名、IP、token、租户名、内部项目名、
-真实业务 ID 等敏感信息，改用 `user-a.json`、`server-local.txt` 这类中性名称。文件内容和元数据中的
-同类信息也要一并脱敏；仅修改文件名不代表例子已经安全。
-
----
-
-## 调整现有项目
-
-- 移动文件前先搜索导入路径、构建上下文、CI 路径过滤、Docker/Podman COPY、Nginx 引用、测试夹具
-  和文档链接；移动后同步更新，不留下兼容性软链或重复副本掩盖问题。
-- 使用版本控制感知的移动操作保留历史。不要顺便重构业务逻辑，先完成可验证的目录迁移。
-- 不创建 `.gitkeep`。确实需要保留空的运行时目录时，使用目录内 `.gitignore`，并让注释独占一行。
-- 不机械创建所有顶层目录。项目没有对应职责时省略该目录；以后首次出现相应文件时再创建。
+Before packaging or sharing examples, remove usernames, email addresses, hosts, IPs, tokens, tenants,
+internal project names, real business IDs, and equivalent sensitive values, using neutral names such as
+`user-a.json` and `server-local.txt`. Strip the same information from file contents and metadata; renaming
+a file does not make it safe.
 
 ---
 
-## 验证
+## Moving an Existing Project
 
-- 运行现有构建、测试、类型检查和打包流程，确认移动后的导入、工作目录和构建上下文正确。
-- 检查版本控制状态，确认没有敏感联调例子、数据集、模型权重、密钥或重复旧文件被提交。
-- FastAPI 项目确认 `docs/api/openapi.json` 已从移动后的真实应用对象重新生成。
-- 报告实际移动的目录、更新的引用和未运行的验证；目录看起来整齐不能证明应用仍可构建或部署。
+- Search imports, build contexts, CI path filters, container COPY instructions, Nginx references, test fixtures, and documentation before moving files; update every reference afterward without leaving compatibility symlinks or duplicate copies that mask problems.
+- Use version-control-aware moves and keep business refactoring separate from layout migration.
+- Do not create `.gitkeep`. When an empty runtime directory must exist, use an internal `.gitignore` with the comment on its own line.
+- Do not create every top-level directory mechanically. Add a directory only when its responsibility exists.
+
+---
+
+## Verification
+
+- Run existing builds, tests, type checks, and packaging, and confirm imports, working directories, and build contexts work after the move.
+- Inspect version-control state for leaked examples, datasets, model weights, secrets, or duplicate old files.
+- For FastAPI projects, confirm `docs/api/openapi.json` was regenerated from the moved application object.
+- Report moved directories, updated references, and checks not run. A tidy-looking directory tree does not prove the application still builds or deploys.

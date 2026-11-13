@@ -13,6 +13,10 @@ FENCE_RE = re.compile(r"^[ \t]*(`{3,}|~{3,})(.*)$")
 
 
 def format_markdown(text: str) -> str:
+    """Insert dividers between adjacent level-two Markdown sections.
+
+    中文：忽略 fenced code 内标题，在相邻二级标题之间确定性插入独立分隔线。
+    """
     lines = text.splitlines()
     output: list[str] = []
     fence_char: str | None = None
@@ -44,18 +48,27 @@ def format_markdown(text: str) -> str:
 
 
 def markdown_files(paths: list[Path]) -> list[Path]:
+    """Collect Markdown files from explicit files and directories.
+
+    中文：展开输入路径并稳定返回 Markdown 文件，同时跳过隐藏目录中的内容。
+    """
     files: set[Path] = set()
     for path in paths:
         if path.is_file() and path.suffix.lower() == ".md":
             files.add(path)
         elif path.is_dir():
             for candidate in path.rglob("*.md"):
-                if ".git" not in candidate.parts:
-                    files.add(candidate)
+                if any(part.startswith(".") for part in candidate.parts):
+                    continue
+                files.add(candidate)
     return sorted(files)
 
 
 def main() -> int:
+    """Check or rewrite section dividers for selected Markdown paths.
+
+    中文：检查模式只报告缺失分隔线，写入模式会直接更新目标 Markdown 文件。
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     parser.add_argument("paths", nargs="+", type=Path)
@@ -73,10 +86,10 @@ def main() -> int:
 
     if args.check and changed:
         for path in changed:
-            print(f"缺少二级章节分割线: {path}", file=sys.stderr)
+            print(f"Missing divider between level-two sections: {path}", file=sys.stderr)
         return 1
     if not args.check:
-        print(f"更新 {len(changed)} 个 Markdown 文件")
+        print(f"Updated {len(changed)} Markdown file(s)")
     return 0
 
 

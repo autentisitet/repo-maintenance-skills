@@ -1,6 +1,6 @@
-# Compose 布局与命令
+# Compose Layout and Commands
 
-## 固定布局
+## Fixed Layout
 
 ```text
 project-root/
@@ -15,25 +15,21 @@ project-root/
         └── docker-compose.podman-gpu.yaml
 ```
 
-Compose 文件不得平铺到仓库根目录或 `deploy-config/` 根部。不要同时维护 `compose.yaml`、
-`docker-compose.yml` 或按单个服务拆出的多套入口文件。
+Do not place Compose files at repository root or directly under `deploy-config/`. Do not maintain competing `compose.yaml`, `docker-compose.yml`, or per-service entrypoints.
 
 ---
 
-## 基础文件与覆盖文件
+## Base and Override Files
 
-`docker-compose.yaml` 集中声明全部服务、网络、命名卷、健康检查、依赖关系和通用 logging。新增、删除
-或重命名服务时只修改基础文件，再检查四个覆盖文件是否仍需调整。
+The base file defines every service, network, named volume, health check, dependency, and common logging option. Add, remove, or rename services there, then update the four overrides only when their runtime-specific differences require it.
 
-覆盖文件只表达对应引擎和加速模式的差异，不得复制完整服务清单，也不得改变无关服务的镜像、端口、
-网络或业务配置。使用时始终组合基础文件和一个覆盖文件，不能同时叠加 CPU 与 GPU 覆盖。
+An override must contain only runtime or accelerator differences. It must not duplicate the full service list or change unrelated images, ports, networks, or business configuration. Always combine the base file with exactly one override; never stack CPU and GPU overrides together.
 
 ---
 
-## Makefile 命令一致性
+## Makefile Selection
 
-Makefile 可以先选择可用 Compose 前端，再从命令推导容器引擎。不要独立探测 `COMPOSE` 和 `RUNTIME`，
-否则机器同时安装 Docker 与 Podman 时可能混用命令和覆盖文件。
+Select one Compose frontend, then derive the runtime from that command. Independent detection can mix Docker commands with Podman overrides on hosts that install both.
 
 ```makefile
 COMPOSE := $(shell \
@@ -80,12 +76,11 @@ endif
 COMPOSE_CMD = $(COMPOSE) $(COMPOSE_FILES)
 ```
 
-容器目标先确认 `$(COMPOSE)` 和 `$(RUNTIME)` 非空，再通过 `$(COMPOSE_CMD)` 执行 `build`、`up`、
-`down`、`logs` 和 `config`。命令行覆盖时只覆盖 `COMPOSE`，让 `RUNTIME` 继续从它推导。
+Container targets must reject empty `COMPOSE` or `RUNTIME`, then use `COMPOSE_CMD` for `build`, `up`, `down`, `logs`, and `config`. Command-line overrides should set only `COMPOSE` so `RUNTIME` remains derived.
 
 ---
 
-## 组合校验
+## Combination Validation
 
 ```bash
 docker compose -f deploy-config/compose/docker-compose.yaml -f deploy-config/compose/docker-compose.docker-cpu.yaml config
@@ -94,4 +89,4 @@ podman compose -f deploy-config/compose/docker-compose.yaml -f deploy-config/com
 podman compose -f deploy-config/compose/docker-compose.yaml -f deploy-config/compose/docker-compose.podman-gpu.yaml config
 ```
 
-检查四个合并结果包含相同服务集合，差异只来自预期的引擎、rootless 或 GPU 设置。
+All merged combinations must contain the same service set. Differences should be limited to intended runtime, rootless, or GPU settings.

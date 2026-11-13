@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
-# 统计 CSS 取值的分布，找出该收敛的零散取值。
+# Report CSS value distributions for consolidation review.
 #
-# 用法: ./audit-css-values.sh [目录或文件...]
+# Usage: ./audit-css-values.sh [directory-or-file...]
 #   ./audit-css-values.sh src/styles
 set -euo pipefail
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  printf '%s\n' \
+    "Usage: $0 [CSS/SCSS directory-or-file...]" \
+    "Writes value statistics to stdout and diagnostics to stderr."
+  exit 0
+fi
 
 if [[ $# -eq 0 ]]; then
   set -- .
@@ -20,11 +27,11 @@ done < <(
 )
 
 if [[ ${#files[@]} -eq 0 ]]; then
-  echo "没有找到 CSS/SCSS 文件" >&2
+  echo "No CSS/SCSS files found." >&2
   exit 1
 fi
 
-echo "扫描 ${#files[@]} 个文件"
+echo "Scanning ${#files[@]} file(s)"
 echo
 
 for prop in border-radius gap padding font-size box-shadow; do

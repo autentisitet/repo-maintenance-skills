@@ -1,36 +1,38 @@
 ---
 name: repo-hygiene
-description: 新建仓库或整理通用配置文件时使用，包括 .gitignore、.gitattributes、.editorconfig、.dockerignore，以及 Python 项目的 requirements 导出与锁文件同步。不涉及业务代码的编写。
+description: Use when creating a repository or maintaining shared configuration such as .gitignore, .gitattributes, .editorconfig, .dockerignore, Python requirements exports, and lockfile synchronization. Do not use for business-logic implementation.
 metadata:
-  short-description: 审查仓库配置、忽略规则、换行策略与 Python 依赖同步
+  short-description: Review ignore rules, line endings, and dependency exports
 ---
 
-# 仓库卫生
+# Repository Hygiene
 
-## 基础配置
+## Baseline Configuration
 
-当仓库需要跨编辑器格式一致性或跨平台换行归一时，考虑加入 `.editorconfig` 和 `.gitattributes`。单文件实验、生成仓库或已有等价工具约束的项目不必机械添加。模板：
+Add `.editorconfig` and `.gitattributes` when the repository needs cross-editor consistency or cross-platform line-ending normalization. Do not add them mechanically to disposable experiments or repositories with equivalent tooling.
 
-| 文件 | 模板 | 作用 |
+| File | Template | Purpose |
 | --- | --- | --- |
-| `.editorconfig` | [assets/editorconfig](assets/editorconfig) | 缩进、换行、末尾空行 |
-| `.gitattributes` | [assets/gitattributes](assets/gitattributes) | 换行归一、二进制标记、语言统计 |
-| `.gitignore` | [assets/gitignore](assets/gitignore) | OS、环境变量、构建产物基线；IDE/agent 规则按需启用 |
+| `.editorconfig` | [assets/editorconfig](assets/editorconfig) | Indentation, line endings, final newline |
+| `.gitattributes` | [assets/gitattributes](assets/gitattributes) | Line normalization, binary markers, language statistics |
+| `.gitignore` | [assets/gitignore](assets/gitignore) | OS, environment, and build-output baseline |
 
-复制时去掉 `assets/` 前缀的模板名，改成以点开头的真实文件名。
-
-`.dockerignore` 不要软链到 `.gitignore`：两者语义不同，镜像里可能反而需要被 git 忽略的文件（反之亦然）。
+Copy templates without the `assets/` prefix and use their real dotfile names. Do not symlink `.dockerignore` to `.gitignore`; their inclusion semantics differ.
 
 ---
 
-## `.gitignore` 要点
+## `.gitignore`
 
-- 只忽略确定不共享的 IDE 与 agent 本地状态。`.idea/`、`.vscode/`、`.claude/`、`.codex/`、`.agents/` 中可能包含团队配置，先检查仓库约定再添加规则。
-- 只忽略本地状态。不要忽略 CI 要读的文件（`.github/`、锁文件、`requirements.txt`）。
-- 环境变量：忽略 `.env` 与 `.env.*`，但保留 `!.env.example`。否定规则必须写在忽略规则之后，否则不生效。
-- 构建产物按目录忽略（`dist/`、`build/`、`node_modules/`），不要用 `*.out` 这类过宽的规则。
-- 不创建 `.gitkeep`。需要保留运行时或生成目录时，在该目录放置 `.gitignore`，忽略目录内容并显式
-  保留 `.gitignore` 自身，例如：
+- Ignore only local IDE and agent state that is known not to be shared. Inspect `.idea/`, `.vscode/`, `.claude/`, `.codex/`, and `.agents/` first.
+- Inventory hidden files and directories with `git status --short --untracked-files=all`, then check
+  proposed ignore patterns with `git check-ignore -v`. Empty directories are not tracked by Git;
+  do not blanket-ignore `.agents/` or `.codex/` when they may contain shared instructions. Keep
+  local credential directories such as a repository-root `.aws/` out of version control; inspect
+  filenames without printing credential contents.
+- Never ignore files required by CI, including `.github/`, lockfiles, and `requirements.txt`.
+- Ignore `.env` and `.env.*`, then re-include `!.env.example` after those rules; a negation must follow the ignore rule or it will not take effect.
+- Ignore build output by directory (`dist/`, `build/`, `node_modules/`) instead of broad extensions such as `*.out`.
+- Do not create `.gitkeep`. Preserve an otherwise empty runtime directory with an internal `.gitignore`:
 
   ```gitignore
   *
@@ -39,38 +41,62 @@ metadata:
 
 ---
 
-## Dotfile 注释
+## Dotfile Comments
 
-dotfile 中的说明性注释单独成行，放在对应配置项之前。不要把注释追加在配置值或忽略规则末尾；
-某些格式不支持行尾注释，独立注释也更便于复制、排序和脚本化修改。
+Place explanatory comments on their own line immediately before the setting. Avoid trailing comments because some formats do not support them and standalone comments are easier to copy and sort.
 
 ---
 
-## Python
+## Python Dependencies
 
-### requirements.txt
+### Non-package repositories
 
-只有部署平台、下游工具或用户工作流明确需要 `requirements.txt` 时才维护它。使用 uv 的项目应从锁定结果导出，不要手写：
+When the repository's primary artifact is not a distributable Python package (for example a skill
+collection with helper scripts), do not add packaging metadata such as `description`, `readme`,
+`license`, or a build backend just to declare runtime dependencies. Generate the minimal project
+file with uv and record only the direct dependencies:
 
 ```bash
-uv export --no-hashes --format requirements-txt -o requirements.txt
+uv init --bare --name <repo-name> --python 3.10
+uv add "PyYAML>=6,<7" "matplotlib>=3.7,<4"
 ```
 
-不要把 `uv pip compile pyproject.toml` 当成从 `uv.lock` 导出的等价操作；两者输入来源不同。
+`uv init --bare` writes only `[project]` with `name`, `version`, and `requires-python`; `uv add`
+records the direct dependencies and re-resolves `uv.lock`. Use this pattern for skills and other
+repos whose Python code is tooling, not a package to publish.
 
-### 生成文件同步
+### Lockfile and exports
 
-采用 `pyproject.toml`、`uv.lock` 和导出型 `requirements.txt` 的项目，在依赖声明变化后同步生成文件：
+Maintain `requirements.txt` only when a deployment platform, downstream tool, or user workflow requires it. In a uv project, export it from the lockfile. When CI installs this file, retain hashes and enforce them with pip:
 
-| 位置 | 怎么改 |
+```bash
+uv export --frozen --format requirements-txt -o requirements.txt
+python3 -m pip install --require-hashes -r requirements.txt
+```
+
+Use `--no-hashes` only when the downstream consumer cannot accept pip hash options and another
+integrity mechanism protects dependency installation.
+
+`uv pip compile pyproject.toml` is not equivalent because it resolves from a different input.
+
+When a project tracks `pyproject.toml`, `uv.lock`, and an exported `requirements.txt`, update every
+generated artifact after dependency changes:
+
+| Location | How to update |
 | --- | --- |
-| `pyproject.toml` | 修改直接依赖或约束 |
-| `uv.lock` | 用 `uv lock` 重新解析 |
-| `requirements.txt` | 从锁定结果重新导出 |
+| `pyproject.toml` | Change the direct dependencies or constraints |
+| `uv.lock` | Re-resolve with `uv lock` |
+| `requirements.txt` | Re-export from the lockfile |
 
-需要持续维护导出文件时，在 CI 中检查它没有过期：
+When the exported file must stay current, verify it in CI with:
 
 ```bash
 uv lock --check
-uv export --no-hashes --format requirements-txt -o - | diff -u requirements.txt -
+uv export --frozen --no-header --format requirements-txt -o /tmp/requirements.txt
+tail -n +3 requirements.txt > /tmp/requirements-committed.txt
+diff -u /tmp/requirements-committed.txt /tmp/requirements.txt
 ```
+
+The committed export has a two-line generation header containing its output path. Compare bodies
+or normalize that header; exporting to a different path and diffing whole files creates a false
+drift report.

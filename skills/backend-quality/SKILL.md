@@ -1,121 +1,88 @@
 ---
 name: backend-quality
-description: 当项目明确采用本仓库的 FastAPI、Nginx 与 Docker/Podman 后端约定时，用于编写、修改或审查 API、OpenAPI 产物、文件上传、数据库迁移、自动化测试和后端代码规范。不用于 serverless、托管网关、其他公网入口方案或未采用该部署模型的普通后端项目。
+description: Use when a project explicitly adopts this repository's FastAPI, Nginx, and Docker/Podman backend conventions and the task changes or reviews APIs, generated OpenAPI, file uploads, database migrations, automated tests, or backend code quality. Do not use for serverless systems, managed gateways, other public-entry architectures, or ordinary backends that do not adopt this deployment model.
 metadata:
-  short-description: 检查后端接口、文件上传、OpenAPI、迁移、Nginx 入口与代码规范
+  short-description: Review APIs, uploads, OpenAPI, migrations, Nginx, and tests
 ---
 
-# 后端质量
+# Backend Quality
 
-## 代码规范
+## Code Quality
 
-- 代码满足业界通行规范（Python 优先 PEP 8，类型标注按项目约定）；项目已有 lint、format 或
-  type check 配置时保持一致，不要另设一套。
-- 变量名、参数名、函数名和类名必须可读并准确表达用途。只保留领域通行且无歧义的缩写，不要用
-  单字母变量、含糊命名或拼写不一致的名字。
-- 函数保持单一职责。有复杂逻辑或调用抽象 API 的函数必须写注释或 docstring，说明意图、前置
-  条件、副作用、非显然的参数与返回值和失败模式；简单自解释代码不要机械补注释。
-- 注释解释“为什么”，不要逐行复述代码“做了什么”。
+- Follow established project lint, formatting, typing, and naming conventions (Python prefers PEP 8, with type annotations per project convention); do not introduce a parallel style system.
+- Use readable names that accurately describe their purpose and only established unambiguous abbreviations. Avoid single-letter variables, vague names, and inconsistent spelling.
+- Keep functions focused. Document non-obvious intent, preconditions, side effects, parameters, results, and failure modes for complex or abstract-API functions; do not mechanically comment self-explanatory code.
+- Explain "why" in comments; do not restate "what" the code does line by line.
 
 ---
 
-## 接口契约
+## API Contract
 
-- 路由、请求模型、响应模型、状态码或鉴权方式变化时，同步更新测试、调用方文档和机器可读契约。
-- FastAPI 项目必须从实际应用对象生成或更新仓库中的 `docs/api/openapi.json`。不要手工编辑该文件，也不要
-  用一份与运行时路由脱节的静态定义替代生成结果。
-- 生成后确认 JSON 可解析，并审查 diff 中的 path、method、schema、required、security 和 response
-  是否符合预期。结构校验通过不代表接口行为正确。
-- 保持 operation ID 稳定且唯一。会破坏现有客户端的字段删除、重命名、类型收窄或状态码变化，必须
-  明确识别为不兼容变更。
+- When routes, request/response models, status codes, or authentication change, update tests, callers, documentation, and machine-readable contracts together.
+- Generate `docs/api/openapi.json` from the real FastAPI application object. Do not edit it manually or maintain a disconnected schema.
+- Confirm that the result parses, then review paths, methods, schemas, required fields, security, and responses. Parsing does not prove behavior.
+- Keep operation IDs stable and unique. Identify removals, renames, narrowed types, and status changes as compatibility risks.
 
-FastAPI 可按项目的应用导入路径生成，例如：
+Example generation pattern:
 
 ```bash
 python - <<'PY'
 import json
 from pathlib import Path
-
 from app.main import app
 
 target = Path("docs/api/openapi.json")
 temporary = target.with_suffix(".json.tmp")
 target.parent.mkdir(parents=True, exist_ok=True)
-temporary.write_text(
-    json.dumps(app.openapi(), ensure_ascii=False, indent=2) + "\n",
-    encoding="utf-8",
-)
+temporary.write_text(json.dumps(app.openapi(), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 temporary.replace(target)
 PY
 python -m json.tool docs/api/openapi.json >/dev/null
 ```
 
-如果导入应用会连接生产服务、执行迁移或产生其他副作用，先修正应用初始化边界，再生成契约；不要
-为了得到文件而使用生产凭据。
+If importing the application connects to production services, runs migrations, or has other side effects, fix the initialization boundary before generating the contract. Never use production credentials merely to obtain the file.
 
 ---
 
-## 公网入口
+## Public Entry Point
 
-- 公网 HTTP/HTTPS 入口只使用 Nginx。Uvicorn、Gunicorn 或其他应用服务器不得直接暴露到公网；
-  本地开发服务器不受此限制。
-- 应用服务器绑定到 loopback、Unix socket 或受控私网地址。防火墙、安全组和容器端口映射只向
-  Nginx 开放应用上游端口。
-- TLS 终止、域名与路径路由、请求体限制、超时和必要的限流在 Nginx 层明确配置。不要依赖应用
-  服务器的开发默认值承担公网边界。
-- 只信任来自已知 Nginx 上游地址的转发头。正确传递并限制 `Host`、客户端地址和协议相关头，避免
-  任意客户端伪造代理信息。
-- 生产环境关闭 auto-reload 和调试模式；进程退出、健康检查和优雅停止由明确的进程管理机制负责。
+- Use Nginx as the only public HTTP/HTTPS entry point. Do not expose Uvicorn, Gunicorn, or another application server directly to the internet. Local development is exempt.
+- Bind application servers to loopback, a Unix socket, or a controlled private address. Limit firewall, security-group, and container publishing to the Nginx path.
+- Configure TLS termination, routing, body limits, timeouts, and necessary rate limits in Nginx.
+- Trust forwarded headers only from known proxy addresses and constrain host, client-address, and protocol headers to prevent arbitrary clients from spoofing proxy information.
+- Disable reload and debug modes in production and use explicit health, shutdown, and process-management behavior.
 
 ---
 
-## 文件上传
+## File Uploads
 
-- 为每类上传设置明确的最大文件大小，并在 Nginx 和应用层都执行限制。应用读取流时累计实际字节数
-  并在超限后立即终止；不要只信任可能缺失或伪造的 `Content-Length`。
-- 按允许列表校验真实文件类型。读取文件头魔数，并在适用时用对应解析器确认内容可解码；不要信任
-  请求头中的 `Content-Type`、客户端文件扩展名或原始文件名。声明类型、扩展名和实际内容不一致时
-  拒绝上传。
-- 保存时使用密码学安全的随机值生成不透明文件名，例如至少 128 bit 随机值的十六进制编码；扩展名
-  只能由服务端根据已验证类型决定。原始文件名最多作为经过长度限制和清理的展示元数据保存，不参与
-  文件系统路径拼接。
-- “路径穿越”是攻击者在文件名或归档条目中加入 `../`、绝对路径、盘符或等价编码，使最终路径逃出
-  预定上传目录，从而覆盖或读取应用有权限访问的其他文件。除随机重命名外，仍要规范化最终路径并
-  确认它位于指定存储根目录内；解压归档时对每个条目执行同样检查。
-- 上传内容即使带有可执行格式、脚本、宏或伪装扩展名，也绝不落地执行。存储目录放在 Web 根目录外，
-  使用不可执行挂载或等价权限，不赋予执行位，不把上传路径传给 shell、解释器、模板引擎或动态加载
-  API。需要转码、解压或恶意软件扫描时，在权限和资源受限的隔离进程中处理。
+- Enforce explicit size limits in both Nginx and the application. Count streamed bytes and stop immediately on overflow; do not trust `Content-Length` alone.
+- Validate content with an allowlist, magic bytes, and a real parser where applicable. Do not trust MIME headers, extensions, or original filenames. Reject uploads whose declared type, extension, and actual content disagree.
+- Generate opaque server-side names with at least 128 bits of cryptographic randomness. Derive extensions only from verified types. At most, keep the original filename as length-limited, sanitized display metadata; never use it to build filesystem paths.
+- Normalize every final path and confirm that it remains inside the storage root. Apply the same rule to every archive member; reject `../`, absolute paths, drive letters, and equivalent encodings.
+- Never execute uploads. Store them outside the web root with non-executable permissions and do not pass upload paths to shells, interpreters, templates, or dynamic loaders. Perform conversion, extraction, or scanning in a resource-constrained isolated process.
 
 ---
 
-## 数据与迁移
+## Data and Migrations
 
-- Redis、PostgreSQL、MySQL 等数据服务不开放公网端口，不绑定公网地址，也不通过容器端口映射发布
-  到宿主机公网接口。容器网络、端口和 rootless 细节使用 `$container-quality`，不要在本 skill 维护
-  另一套 Compose 规则。
-- 运维访问通过受控的 SSH 隧道、VPN、堡垒机或仅绑定 loopback 的临时端口转发完成；认证、最小
-  权限和传输加密仍然必须配置，内网隔离不能替代这些控制。
-- 数据库结构变化使用可审查、可重复执行的迁移，不在应用启动时隐式改表。
-- 迁移同时考虑升级、回滚或前滚恢复、锁表时间和旧版本应用的兼容窗口。高风险数据变换先备份并在
-  接近生产规模的数据上演练。
-- 跨多次写入的业务操作明确事务边界；外部调用不要无意中占用长事务。重试只用于可安全重放的操作，
-  或配合幂等键与去重机制。
+- Do not expose Redis or databases publicly. Use `$container-quality` for network, port, and rootless-container details.
+- Use controlled tunnels, VPNs, bastions, or loopback forwarding for operations; isolation does not replace authentication, least privilege, or encryption.
+- Apply schema changes through reviewable, repeatable migrations, not implicit startup mutation.
+- Plan rollback or forward recovery, lock duration, compatibility windows, backups, and production-scale rehearsal for risky transformations.
+- Define transaction boundaries explicitly. Avoid external calls inside long transactions. Retry only replay-safe operations or use idempotency and deduplication.
 
 ---
 
-## 验证
+## Verification
 
-- 至少覆盖正常请求、验证失败、未认证或未授权、资源不存在和关键冲突路径。
-- 对数据库约束、事务回滚、迁移和外部依赖失败做集成验证；只 mock 掉不可控边界，不把核心持久化
-  行为全部替换成 mock。
-- 修改 FastAPI 接口后，在测试中生成一次 OpenAPI schema，并与提交的 `docs/api/openapi.json` 比较，防止
-  契约产物过期。
-- 部署相关修改至少检查 Nginx 配置语法，并从公网入口路径验证健康检查和一个代表性 API；直连应用
-  端口成功不能证明公网代理链路正确。
+- Cover success, validation failure, authentication/authorization failure, not-found, and key conflict paths.
+- Test constraints, rollback, migrations, and external dependency failures with integration coverage. Do not mock away core persistence behavior.
+- After changing a FastAPI API, generate the OpenAPI schema once in tests and compare it with the committed `docs/api/openapi.json` to prevent stale contract artifacts.
+- For deployment changes, at least validate Nginx syntax and verify the health check and one representative API through the public entry path. A successful direct connection to the application port does not prove the public proxy chain is correct.
 
 ---
 
-## 交付
+## Report
 
-报告接口兼容性、`docs/api/openapi.json` 是否更新、执行过的单元/集成/迁移/Nginx 验证，以及未覆盖的生产
-风险。不要把 schema 生成成功、配置语法通过或测试替身返回成功描述成端到端行为已被证明。
+Report API compatibility, whether `docs/api/openapi.json` is updated, the unit/integration/migration/Nginx checks performed, and remaining production risks. Do not describe schema generation success, passing syntax checks, or test-double success as end-to-end proof.

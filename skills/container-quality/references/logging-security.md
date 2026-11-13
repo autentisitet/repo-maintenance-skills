@@ -1,9 +1,8 @@
-# 日志与构建安全
+# Logging and Build Security
 
-## 日志落盘与轮转
+## Persistent Logs and Rotation
 
-所有长期运行服务都把 stdout/stderr 交给可落盘且支持轮转的容器日志驱动。基础
-`docker-compose.yaml` 定义共享 logging 配置，并让每个服务显式继承：
+Send long-running service stdout/stderr to a persistent container logging driver with bounded rotation. Define shared logging in the base Compose file and attach it explicitly:
 
 ```yaml
 x-logging: &default-logging
@@ -17,26 +16,22 @@ services:
     logging: *default-logging
 ```
 
-`max-size` 和 `max-file` 根据日志量与磁盘预算调整，但不得无限增长。应用自身写文件日志时也要轮转，
-且不要与容器 stdout 无控制地重复记录同一内容。
+Adjust limits to log volume and disk budget, but never allow unbounded growth. If the application also writes files, rotate those files and avoid uncontrolled duplication with container stdout.
 
-Docker 与 Podman 可能使用不同底层日志实现。部署前检查合并配置和实际容器日志驱动，并产生足以超过
-`max-size` 的非敏感测试日志，确认日志真实落盘、轮转且磁盘占用受限。
+Docker and Podman may use different logging backends. Inspect the merged configuration and actual runtime driver, then generate enough non-sensitive test output to verify persistence, rotation, and bounded disk use.
 
 ---
 
-## 构建上下文
+## Build Context
 
-- Docker 和 Podman 都从仓库根目录构建，例如 `docker build -f Dockerfile .` 和
-  `podman build -f Dockerfile .`。
-- `.dockerignore` 排除密钥、版本控制元数据、本地环境、数据集、模型权重、测试输出和无关构建产物。
-- Dockerfile 不先复制整个仓库再删除敏感内容；先限制上下文，再按构建阶段只复制必需文件。
+- Build both runtimes from repository root, for example `docker build -f Dockerfile .` and `podman build -f Dockerfile .`.
+- Exclude secrets, VCS metadata, local environments, datasets, model weights, test output, and unrelated artifacts in `.dockerignore`.
+- Do not copy the whole repository and delete sensitive content later. Restrict the context first and copy only required files per build stage.
 
 ---
 
-## 密钥与权限
+## Secrets and Privileges
 
-- 不把密码、token、私钥或真实环境文件写进 Dockerfile、Compose、镜像层或 build args。使用运行时
-  secret 机制或受控外部注入。
-- 不用 `--privileged` 掩盖设备、挂载或权限配置错误。只授予服务实际需要的 capability、设备和目录。
-- 检查镜像构建记录和 Compose 合并结果，确认敏感值没有进入可提交文件或镜像历史。
+- Do not place passwords, tokens, private keys, or real environment files in Dockerfiles, Compose files, image layers, or build arguments. Use runtime secret mechanisms or controlled external injection.
+- Do not use `--privileged` to hide device, mount, or permission errors. Grant only required capabilities, devices, and paths.
+- Inspect image history and merged Compose output for sensitive values before delivery.

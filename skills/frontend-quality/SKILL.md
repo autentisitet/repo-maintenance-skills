@@ -1,26 +1,33 @@
 ---
 name: frontend-quality
-description: 编写或审查 HTML/CSS 界面时使用，包括收敛设计取值、用截图确认真实渲染效果、检查可访问性与浏览器兼容性。适用于静态页面和小型前端；不涉及组件库 API 设计或前端框架选型。
+description: Use when writing or reviewing HTML/CSS interfaces, including consolidating design values, verifying real rendering with screenshots, and checking accessibility and browser compatibility. Applies to static pages and small frontends. Do not use for component-library API design or frontend framework selection.
 metadata:
-  short-description: 检查界面设计取值、真实渲染、可访问性与浏览器兼容性
+  short-description: Review interface values, rendering, accessibility, and compatibility
 ---
 
-# 前端界面
+# Frontend Quality
 
-## 源码
+## Available Scripts
 
-- 压缩后的 CSS 是合法代码，但不能作为唯一源码。至少保留一份可编辑的源文件，产物另存并能在构建时重新生成。
-- 圆角、间距、字号、阴影、颜色收敛成一组设计 token（CSS 变量）。新增 token 前，先确认现有
-  token 没有语义相同或视觉上足够接近的值；例如已有 `--space-2: 8px` 时，先判断 8px 是否可接受，
-  只有明确不满足该场景时才新增。
-- 用 [scripts/audit-css-values.sh](scripts/audit-css-values.sh) 统计现有取值分布，把低频值作为人工审查线索；有明确语义或组件约束的值可以保留。
-- 新增 `!important` 前先排查层叠顺序、作用域和第三方样式边界。覆盖不可控的内联样式或外部组件时，`!important` 可能是合理的局部选择。
+- [scripts/audit-css-values.sh](scripts/audit-css-values.sh): print CSS/SCSS value distributions for consolidation review.
+- [scripts/screenshot.sh](scripts/screenshot.sh): capture a page with headless Chrome for render verification; set `CHROME_PATH` when the browser cannot be discovered.
+
+Workflow: audit value spread with `audit-css-values.sh`, start a local server and capture representative viewports with `screenshot.sh`, then open the images and inspect the issues described below.
 
 ---
 
-## 渲染验证
+## Source
 
-不要靠脑补判断布局。启动本地服务后截图：
+- Minified CSS is a valid artifact, but it must not be the only source. Keep an editable source and a reproducible build path.
+- Consolidate radius, spacing, typography, shadows, and colors into a coherent token set. Reuse an existing semantically suitable value before adding another near-duplicate; for example, when `--space-2: 8px` already exists, first decide whether 8px is acceptable and add a token only when it clearly does not satisfy that case.
+- Run [scripts/audit-css-values.sh](scripts/audit-css-values.sh) to identify low-frequency values for review. Keep values with a real semantic or component constraint.
+- Before adding `!important`, inspect cascade order, scope, and third-party boundaries. A narrowly scoped override of uncontrollable inline or vendor styles can be valid.
+
+---
+
+## Render Verification
+
+Do not infer layout correctness from source alone. Start the page and capture representative views:
 
 ```bash
 python3 -m http.server 8000 --directory ./dist &
@@ -28,25 +35,25 @@ python3 -m http.server 8000 --directory ./dist &
 "<skill-dir>/scripts/screenshot.sh" http://localhost:8000 390x844 out/mobile.png
 ```
 
-- 根据目标设备至少检查一个代表性宽屏和窄屏尺寸；存在明确断点时覆盖断点两侧。
-- 截图后实际打开图片检查：溢出、遮挡、文字被截断、字号过小、对比度不足。
-- 静态截图覆盖不到 hover、focus、disabled 等状态，需要单独检查对应 CSS 规则。
-- 暗色模式单独截一轮，不要假设反色即可用。
+- Check at least one wide and one narrow viewport; cover both sides of meaningful breakpoints.
+- Open the screenshots and inspect overflow, overlap, clipping, unreadable type, and insufficient contrast.
+- Inspect hover, focus, and disabled states separately because static screenshots do not cover them.
+- Test dark mode independently instead of assuming automatic inversion is usable.
 
 ---
 
-## 可访问性
+## Accessibility
 
-- 正文与背景对比度达到 WCAG AA（4.5:1），大字号 3:1。
-- 所有可交互元素可键盘聚焦，`:focus-visible` 有可见样式；不要全局 `outline: none`。
-- 图片有 `alt`；纯装饰图用 `alt=""` 而不是省略属性。
-- 不用颜色单独传递状态。错误、成功同时给出文字或图标。
-- 表单控件有可关联的 `<label>`，不要只靠 placeholder。
+- Meet WCAG AA contrast: 4.5:1 for normal text and 3:1 for large text.
+- Keep every interactive element keyboard reachable and provide visible `:focus-visible` styling.
+- Give informative images meaningful `alt`; use `alt=""` for decorative images.
+- Do not communicate state through color alone.
+- Associate form controls with labels instead of relying only on placeholders.
 
 ---
 
-## 兼容性
+## Compatibility
 
-- 使用特性前查 caniuse，确认目标浏览器范围。
-- 需要兼容旧浏览器时用 `@supports` 给回退样式，不要静默降级成错乱的布局。
-- 避免依赖单一引擎的实现细节（例如只在 Chromium 生效的滚动条样式）。
+- Check target-browser support before using a feature.
+- Use `@supports` fallbacks when older browsers must remain supported; do not silently degrade into a broken layout.
+- Avoid relying on behavior implemented by only one browser engine.
