@@ -1,8 +1,7 @@
 # Changelog
 
 All notable changes to this project are documented in this file. The project follows Semantic
-Versioning. The local `0.2.0` and `0.3.0` milestones were committed on November 14, 2026;
-tags and remote publication are separate steps.
+Versioning. Versions `0.2.0` and `0.3.0` were committed on November 14, 2026.
 
 ## Unreleased
 
@@ -10,7 +9,25 @@ No changes yet.
 
 ---
 
-## 0.3.0 - 2026-11-14
+## 0.3.1 - 2026-11-14
+
+### Added
+
+- Added managed-only POSIX and Windows uninstallers, with isolated removal tests and Windows
+  `-WhatIf` coverage. User-managed skills are left untouched.
+- Added `SECURITY.md` with a private vulnerability reporting channel and support scope.
+
+### Changed
+
+- **Compatibility:** Raised the minimum Python version from 3.10 to 3.12 so all supported
+  environments can resolve a Pillow version outside the range flagged by Dependabot. Refreshed
+  the uv lockfile and hashed requirements export; CI now explicitly uses Python 3.12.
+- Run required CI checks on all pull requests, including image- and license-only changes, so
+  the `Protect main` ruleset never waits for a path-filtered job.
+
+---
+
+## [v0.3.0] - 2026-11-14
 
 ### Added
 
@@ -107,7 +124,7 @@ No changes yet.
 
 ---
 
-## 0.2.0 - 2026-11-14
+## [v0.2.0] - 2026-11-14
 
 ### Added
 
@@ -124,9 +141,13 @@ No changes yet.
 
 ---
 
-## 0.1.0
+## [v0.1.0]
 
 ### Added
 
 - Added the initial repository-maintenance skill collection, basic installation scripts, repository
   documentation, routing examples, and validation workflow.
+
+[v0.1.0]: https://github.com/autentisitet/repo-maintenance-skills/tree/v0.1.0
+[v0.2.0]: https://github.com/autentisitet/repo-maintenance-skills/tree/v0.2.0
+[v0.3.0]: https://github.com/autentisitet/repo-maintenance-skills/tree/v0.3.0
