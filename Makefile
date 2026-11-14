@@ -8,7 +8,7 @@ CROSS_MODELS ?= deepseek-flash gpt-6-luna
 
 .DEFAULT_GOAL := usage
 
-.PHONY: usage validate eval smoke eval-train eval-validation eval-full sync metrics plot plot-baseline csv-export csv-import csv-check retry-set cross install install-copy
+.PHONY: usage validate eval smoke eval-train eval-validation eval-full sync metrics plot plot-baseline csv-export csv-import csv-check retry-set cross install install-copy uninstall
 
 usage:
 	@printf '%s\n' \
@@ -37,7 +37,8 @@ usage:
 	  '' \
 	  'Installation:' \
 	  '  make install          symlink skills into CODEX_HOME' \
-	  '  make install-copy     copy skills into CODEX_HOME'
+	  '  make install-copy     copy skills into CODEX_HOME' \
+	  '  make uninstall        remove only this repository managed skills'
 
 validate:
 	@$(PYTHON) -m scripts.packages.validate_skills --strict
@@ -46,7 +47,7 @@ validate:
 	@$(PYTHON) -m scripts.evals.convert_queries check evals/validation_queries.json evals/validation_queries.csv
 	@$(PYTHON) -m unittest discover -s tests -p 'test_*.py'
 	@$(PYTHON) skills/markdown-docs/scripts/section-dividers.py --check .
-	@bash -n scripts/links/install.sh skills/*/scripts/*.sh
+	@bash -n scripts/links/install.sh scripts/links/uninstall.sh skills/*/scripts/*.sh
 
 eval: validate
 	@$(PYTHON) -m scripts.evals.check_skill_discovery --output evals/results/discovery.json
@@ -122,3 +123,6 @@ install:
 
 install-copy:
 	@./scripts/links/install.sh --copy
+
+uninstall:
+	@./scripts/links/uninstall.sh

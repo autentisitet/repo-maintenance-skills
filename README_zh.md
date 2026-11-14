@@ -2,7 +2,7 @@
 
 [English](README.md) | [中文](README_zh.md)
 
-[![Version](https://img.shields.io/badge/version-v0.3.0-0A7BBB)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v0.3.1-0A7BBB)](CHANGELOG.md)
 [![CI](https://github.com/autentisitet/repo-maintenance-skills/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/autentisitet/repo-maintenance-skills/actions/workflows/ci.yml)
 [![Codex Skills](https://img.shields.io/badge/Codex-Skills-000000?logo=openai&logoColor=white)](https://developers.openai.com/codex/skills/)
 [![Anthropic Agent Skills](https://img.shields.io/badge/Anthropic-Agent_Skills-D97757?logo=anthropic&logoColor=white)](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)
@@ -62,6 +62,15 @@ Set-Location "$HOME\repo-maintenance-skills"
 ```
 
 默认创建目录 junction；需要独立副本时使用 `.\scripts\links\install.ps1 -Copy`。
+
+卸载本仓库安装的 skills：
+
+```bash
+make uninstall
+```
+
+原生 Windows 使用 `.\scripts\links\uninstall.ps1`，可加 `-WhatIf` 预览。卸载器仅移除指向
+当前仓库的链接或带本项目安装标记的副本；不会删除其他 skills、来源未知的同名目录或本仓库本身。
 
 `--force` / `-Force` 只替换指向当前仓库的链接或带本项目安装标记的复制副本。遇到来源未知的同名
 目录时会停止，避免删除用户自行维护的 skill。
@@ -130,7 +139,7 @@ repo-maintenance-skills/
 
 ## 校验
 
-使用 Python 3.10+，并用 uv 安装依赖（也可以用 pip 从导出的 `requirements.txt` 安装）：
+使用 Python 3.12+，并用 uv 安装依赖（也可以用 pip 从导出的 `requirements.txt` 安装）：
 
 ```bash
 uv sync
@@ -291,3 +300,4 @@ $$
 ## License
 
 本项目采用 [MIT License](LICENSE)。
+安全问题请按 [SECURITY.md](SECURITY.md) 中的说明私密报告。

@@ -2,7 +2,7 @@
 
 [English](README.md) | [中文](README_zh.md)
 
-[![Version](https://img.shields.io/badge/version-v0.3.0-0A7BBB)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v0.3.1-0A7BBB)](CHANGELOG.md)
 [![CI](https://github.com/autentisitet/repo-maintenance-skills/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/autentisitet/repo-maintenance-skills/actions/workflows/ci.yml)
 [![Codex Skills](https://img.shields.io/badge/Codex-Skills-000000?logo=openai&logoColor=white)](https://developers.openai.com/codex/skills/)
 [![Anthropic Agent Skills](https://img.shields.io/badge/Anthropic-Agent_Skills-D97757?logo=anthropic&logoColor=white)](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)
@@ -67,6 +67,17 @@ Set-Location "$HOME\repo-maintenance-skills"
 
 Directory junctions are created by default; use `.\scripts\links\install.ps1 -Copy` for an
 independent copy.
+
+To remove this repository's installed skills:
+
+```bash
+make uninstall
+```
+
+On native Windows use `.\scripts\links\uninstall.ps1` (add `-WhatIf` to preview removals).
+The uninstallers remove only links pointing at this checkout or copies bearing its installation
+marker. Other skills and unknown same-named directories are left untouched; the source repository
+is never deleted.
 
 `--force` / `-Force` only replaces links that point at this repository or copies marked by this
 project's installation marker. When it encounters a same-named directory of unknown origin, it stops
@@ -138,7 +149,7 @@ are not kept.
 
 ## Validation
 
-Use Python 3.10+ and install dependencies with uv (or pip from the exported `requirements.txt`):
+Use Python 3.12+ and install dependencies with uv (or pip from the exported `requirements.txt`):
 
 ```bash
 uv sync
@@ -310,3 +321,4 @@ The charts use the same historical subset as the table above.
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md).

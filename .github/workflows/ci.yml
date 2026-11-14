@@ -3,16 +3,8 @@ name: CI
 on:
   push:
     branches: [main]
-    # Markdown structure and links are validation inputs, so do not ignore *.md.
-    paths-ignore:
-      - "LICENSE"
-      - "**/*.png"
-      - "**/*.jpg"
+  # The main ruleset requires both jobs on every PR, including docs-only changes.
   pull_request:
-    paths-ignore:
-      - "LICENSE"
-      - "**/*.png"
-      - "**/*.jpg"
 
 permissions:
   contents: read
@@ -32,6 +24,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
       - name: Check dependency lock and export
@@ -146,4 +142,32 @@ jobs:
           }
           if (-not (Test-Path (Join-Path $unmanaged "keep-me"))) {
             throw "unmanaged skill was removed"
+          }
+      - name: Smoke-test PowerShell uninstaller
+        run: |
+          $env:CODEX_HOME = Join-Path $env:RUNNER_TEMP "codex-uninstall-junction"
+          .\scripts\links\install.ps1
+          .\scripts\links\uninstall.ps1 -WhatIf
+          if (-not (Test-Path "$env:CODEX_HOME\skills\markdown-docs\SKILL.md")) {
+            throw "WhatIf removed a managed junction"
+          }
+          .\scripts\links\uninstall.ps1
+          if (Test-Path "$env:CODEX_HOME\skills\markdown-docs") {
+            throw "managed junction survived uninstall"
+          }
+
+          $env:CODEX_HOME = Join-Path $env:RUNNER_TEMP "codex-uninstall-copy"
+          .\scripts\links\install.ps1 -Copy
+          .\scripts\links\uninstall.ps1
+          if (Test-Path "$env:CODEX_HOME\skills\markdown-docs") {
+            throw "managed copy survived uninstall"
+          }
+
+          $env:CODEX_HOME = Join-Path $env:RUNNER_TEMP "codex-uninstall-unmanaged"
+          $unmanaged = Join-Path $env:CODEX_HOME "skills\markdown-docs"
+          New-Item -ItemType Directory -Path $unmanaged -Force | Out-Null
+          New-Item -ItemType File -Path (Join-Path $unmanaged "keep-me") | Out-Null
+          .\scripts\links\uninstall.ps1
+          if (-not (Test-Path (Join-Path $unmanaged "keep-me"))) {
+            throw "uninstaller removed an unmanaged skill"
           }
